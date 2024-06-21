@@ -60,7 +60,7 @@ class HomeEndpoints extends Controller
     }
 
     public function getLatestProducts($token) {
-        $products = Product::latest()-with(["gallery", "options"])->limit(15)->get();
+        $products = Product::latest()-with(["gallery", "options"])->take(15)->get();
 
         return $products = $this->addIsFavKey($products, $token);
     }
