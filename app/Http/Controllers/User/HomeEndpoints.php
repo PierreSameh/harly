@@ -52,7 +52,7 @@ class HomeEndpoints extends Controller
     }
 
     public function getCategories() {
-        return $categories = Category::limit(10)->get();
+        return $categories = Category::limit(5)->get();
     }
 
     public function getLatestBanners() {
