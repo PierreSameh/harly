@@ -343,7 +343,6 @@ class AuthController extends Controller
     public function forgetPassword(Request $request) {
         $validator = Validator::make($request->all(), [
             "email" => ["required", "email"],
-            "code" => ["required"],
             'password' => [
                 'required', // Required only if joined_with is 1
                 'min:8',
@@ -351,7 +350,6 @@ class AuthController extends Controller
                 'confirmed'
             ],
         ], [
-            "code.required" => "ادخل رمز التاكيد ",
             "email.required" => "من فضلك ادخل بريدك الاكتروني ",
             "email.email" => "من فضلك ادخل بريد الكتروني صالح",
             "password.required" => "ادخل كلمة المرور",
@@ -375,32 +373,58 @@ class AuthController extends Controller
         $code = $request->code;
 
         if ($user) {
-            if ((int) $user->joined_with === 2)
-            return $this->handleResponse(
-                true,
-                "",
-                ["هذا الحساب مسجل بواسطة جوجل يمكنك الدخول باستخدام التسجيل بجوجل"],
-                [],
-                [
-                    "code get expired after 10 minuts",
-                    "the same endpoint you can use for ask resend email"
-                ]
-            );
+            $user->password = Hash::make($request->password);
+            $user->save();
 
-            if ((int) $user->joined_with === 3)
+            if ($user) {
                 return $this->handleResponse(
                     true,
-                    "",
-                    ["هذا الحساب مسجل بواسطة فيسبوك يمكنك الدخول باستخدام التسجيل بفيسبوك"],
+                    "تم تعين كلمة المرور بنجاح ",
                     [],
-                    [
-                        "code get expired after 10 minuts",
-                        "the same endpoint you can use for ask resend email"
-                    ]
+                    [],
+                    []
                 );
+            }
+        }
+        else {
+            return $this->handleResponse(
+                false,
+                "",
+                ["هذا الحساب غير مسجل"],
+                [],
+                []
+            );
+        }
 
+    }
+
+    public function forgetPasswordCheckCode(Request $request) {
+        $validator = Validator::make($request->all(), [
+            "email" => ["required", "email"],
+            "code" => ["required"],
+        ], [
+            "code.required" => "ادخل رمز التاكيد ",
+            "email.required" => "من فضلك ادخل بريدك الاكتروني ",
+            "email.email" => "من فضلك ادخل بريد الكتروني صالح",
+        ]);
+
+        if ($validator->fails()) {
+            return $this->handleResponse(
+                false,
+                "",
+                [$validator->errors()->first()],
+                [],
+                []
+            );
+        }
+
+
+        $user = User::where("email", $request->email)->first();
+        $code = $request->code;
+
+        if ($user) {
             if (!Hash::check($code, $user->email_last_verfication_code ? $user->email_last_verfication_code : Hash::make(0000))) {
-                    return $this->handleResponse(
+                return $this->handleResponse(
                     false,
                     "",
                     ["الرمز غير صحيح"],
@@ -419,13 +443,10 @@ class AuthController extends Controller
                         []
                     );
                 } else {
-                    $user->password = Hash::make($request->password);
-                    $user->save();
-
                     if ($user) {
                         return $this->handleResponse(
                             true,
-                            "تم تعين كلمة المرور بنجاح ",
+                            "الرمز صحيح",
                             [],
                             [],
                             []
