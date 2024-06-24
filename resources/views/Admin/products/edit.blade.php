@@ -24,6 +24,10 @@
                 <input type="number" class="form-control" id="price"  placeholder="Sell Price" v-model="price">
             </div>
             <div class="form-group w-100">
+                <label for="price" class="form-label">Previous Price</label>
+                <input type="number" class="form-control" id="price"  placeholder="Previous Price" v-model="prev_price">
+            </div>
+            <div class="form-group w-100">
                 <label for="quantity" class="form-label">Quantity</label>
                 <input type="number" class="form-control" id="quantity"  placeholder="Quantity" v-model="quantity">
             </div>
@@ -164,6 +168,7 @@ createApp({
             name: '{{ $product->name }}',
             description: '{{ $product->description }}',
             price: '{{ $product->price }}',
+            prev_price: '{{ $product->prev_price }}',
             quantity: '{{ $product->quantity }}',
             thumbnail: null,
             thumbnail_path: '{{ $product->main_image }}',
@@ -226,6 +231,7 @@ createApp({
                     name: this.name,
                     description: this.description,
                     price: this.price,
+                    prev_price: this.prev_price,
                     quantity: this.quantity,
                     images: this.images,
                     deleted_gallery: this.deletedGallery,

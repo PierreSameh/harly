@@ -15,6 +15,7 @@ class Product extends Model
         "description",
         "quantity",
         "price",
+        "prev_price",
         "isDiscounted",
         "category_id",
     ];

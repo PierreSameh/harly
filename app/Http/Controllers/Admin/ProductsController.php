@@ -91,6 +91,7 @@ class ProductsController extends Controller
             "description" => $request->description,
             "quantity" => $request->quantity,
             "price" => $request->price,
+            "prev_price" => $request->prev_price,
             "main_image" => '/images/uploads/Products/' . $main_image_name,
             "category_id" => $request->category_id,
         ]);
@@ -192,6 +193,7 @@ class ProductsController extends Controller
         $product->description = $request->description;
         $product->quantity = $request->quantity;
         $product->price = $request->price;
+        $product->prev_price = $request->prev_price;
         $product->category_id = $request->category_id;
 
         if ($request->deleted_gallery) {

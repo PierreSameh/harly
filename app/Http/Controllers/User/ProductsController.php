@@ -115,16 +115,32 @@ class ProductsController extends Controller
             ]
         );
     }
-
     public function search(Request $request) {
         $per_page = $request->per_page ? $request->per_page : 10;
 
-        $sortKey =($request->sort && $request->sort == "HP") || ( $request->sort && $request->sort == "LP") ? "price" :"created_at";
-        $sortWay = $request->sort && $request->sort == "HP" ? "desc" : ( $request->sort && $request->sort  == "LP" ? "asc" : "desc");
+        $sortKey = ($request->sort && ($request->sort == "HP" || $request->sort == "LP")) ? "price" : "created_at";
+        $sortWay = $request->sort && $request->sort == "HP" ? "desc" : ($request->sort && $request->sort == "LP" ? "asc" : "desc");
         $search = $request->search ? $request->search : '';
 
-        $products = Product::with(["gallery", "options"])->where('name', 'like', '%' . $search . '%')
-        ->orWhere('description', 'like', '%' . $search . '%')->orderBy($sortKey, $sortWay)->paginate($per_page);
+        $query = Product::with(["gallery", "options"])
+            ->where(function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
+
+        if ($request->has('price_from')) {
+            $query->where('price', '>=', $request->price_from);
+        }
+
+        if ($request->has('price_to')) {
+            $query->where('price', '<=', $request->price_to);
+        }
+
+        if ($request->has('categories')) {
+            $query->whereIn('category_id', $request->categories);
+        }
+
+        $products = $query->orderBy($sortKey, $sortWay)->paginate($per_page);
 
         $products = $this->addIsFavKey($products, $request->header('Authorization'));
 
@@ -143,7 +159,10 @@ class ProductsController extends Controller
                     "sort" => [
                         "HP" => "height price",
                         "LP" => "lowest price",
-                    ]
+                    ],
+                    "price_from" => "لتحديد الحد الأدنى للسعر",
+                    "price_to" => "لتحديد الحد الأقصى للسعر",
+                    "categories" => "لتحديد فئات معينة"
                 ],
                 "sort" => [
                     "default" => "لو مبعتش حاجة هيفلتر ع اساس الاحدث",

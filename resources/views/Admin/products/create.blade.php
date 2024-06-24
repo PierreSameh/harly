@@ -20,6 +20,10 @@
                 <input type="text" class="form-control" id="name"  placeholder="Product Name" v-model="name">
             </div>
             <div class="form-group w-100">
+                <label for="price" class="form-label">Previous Price</label>
+                <input type="number" class="form-control" id="price"  placeholder="Previous Price" v-model="prev_price">
+            </div>
+            <div class="form-group w-100">
                 <label for="price" class="form-label">Sell Price</label>
                 <input type="number" class="form-control" id="price"  placeholder="Sell Price" v-model="price">
             </div>
@@ -146,6 +150,7 @@ createApp({
             description: null,
             category_id: '',
             price: 0,
+            prev_price: 0,
             quantity: 0,
             thumbnail_path: null,
             thumbnail: null,
@@ -193,6 +198,7 @@ createApp({
                     name: this.name,
                     description: this.description,
                     price: this.price,
+                    prev_price: this.prev_price,
                     quantity: this.quantity,
                     images: this.images,
                     category_id: this.category_id,
