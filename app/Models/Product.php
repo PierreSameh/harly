@@ -18,6 +18,9 @@ class Product extends Model
         "prev_price",
         "isDiscounted",
         "category_id",
+        'code',
+        'group',
+        'hashtag'
     ];
 
     public function gallery()
@@ -28,6 +31,11 @@ class Product extends Model
     public function options()
     {
         return $this->hasMany('App\Models\Option', 'product_id');
+    }
+
+    public function additional_data()
+    {
+        return $this->hasMany('App\Models\Additional', 'product_id');
     }
 
     public function category()

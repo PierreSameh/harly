@@ -32,6 +32,18 @@
                 <input type="number" class="form-control" id="quantity"  placeholder="Quantity" v-model="quantity">
             </div>
             <div class="form-group w-100">
+                <label for="code" class="form-label">code</label>
+                <input type="text" class="form-control" id="code" placeholder="code" v-model="code">
+            </div>
+            <div class="form-group w-100">
+                <label for="group" class="form-label">group</label>
+                <input type="text" class="form-control" id="group" placeholder="group" v-model="group">
+            </div>
+            <div class="form-group w-100">
+                <label for="hashtag" class="form-label">hashtag</label>
+                <input type="text" class="form-control" id="hashtag" placeholder="hashtag" v-model="hashtag">
+            </div>
+            <div class="form-group w-100">
                 <label for="categories" class="form-label">Category</label>
                 <select name="categories" id="categories" class="form-control" v-model="category_id">
                     <option value="" disabled>Select ---</option>
@@ -115,6 +127,32 @@
         </div>
      </div>
      <div class="d-flex justify-content-between mb-4">
+        <h2>Additional Data</h2>
+        <button class="btn btn-primary" @click="handleAddAdditionalData">Add Data</button>
+    </div>
+    <table class="table" v-if="additional_data && additional_data.length > 0">
+        <thead>
+            <tr>
+                <th scope="col">Key</th>
+                <th scope="col">Value</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="(data, index) in additional_data" :key="index">
+                <td>
+                    <input type="text" name="key" id="key" class="form-control" placeholder="Key" v-model="additional_data[index]['key']">
+                </td>
+                <td>
+                    <input type="text" name="value" id="value" class="form-control" placeholder="Value" v-model="additional_data[index]['value']">
+                </td>
+                <td>
+                    <button class="btn btn-danger" @click="handleRemoveAdditionalData(index)">Remove</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+     <div class="d-flex justify-content-between mb-4">
         <h2>Does this product has options?</h2>
         <button class="btn btn-primary" @click="handleAddOption">Add Option</button>
      </div>
@@ -170,10 +208,14 @@ createApp({
             price: '{{ $product->price }}',
             prev_price: '{{ $product->prev_price }}',
             quantity: '{{ $product->quantity }}',
+            hashtag: '{{ $product->quantity }}',
+            group: '{{ $product->quantity }}',
+            code: '{{ $product->quantity }}',
             thumbnail: null,
             thumbnail_path: '{{ $product->main_image }}',
             gallery: @json($product->gallery),
             categories: @json($categories),
+            additional_data: @json($product->additional_data ?? []),
             deletedGallery: [],
             images_path: [],
             options: @json($product->options),
@@ -181,6 +223,15 @@ createApp({
         }
     },
     methods: {
+        handleAddAdditionalData() {
+            this.additional_data.push({
+                key: "",
+                value: ""
+            });
+        },
+        handleRemoveAdditionalData(index) {
+            this.additional_data.splice(index, 1);
+        },
         handleAddOption() {
             this.options.push({
                 size: "",
@@ -237,6 +288,10 @@ createApp({
                     deleted_gallery: this.deletedGallery,
                     category_id: this.category_id,
                     options: this.options,
+                    hashtag: this.hashtag,
+                    group: this.group,
+                    code: this.code,
+                    additional_data: this.additional_data
                 },
                 {
                     headers: {

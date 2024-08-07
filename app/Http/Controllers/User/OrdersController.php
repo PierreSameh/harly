@@ -32,6 +32,7 @@ class OrdersController extends Controller
                     "",
                     ["العربة فارغة قم بتعبئتها اولا"],
                     [],
+                    [],
                 );
 
             // validate recipient info
@@ -56,6 +57,7 @@ class OrdersController extends Controller
                     false,
                     "",
                     [$validator->errors()->first()],
+                    [],
                     [],
                 );
             }

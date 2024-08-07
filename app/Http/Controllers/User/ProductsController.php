@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Wishlist;
 use App\Models\Category;
+use Exception;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\PersonalAccessToken;
 class ProductsController extends Controller
@@ -56,7 +57,7 @@ class ProductsController extends Controller
         $sortKey =($request->sort && $request->sort == "HP") || ( $request->sort && $request->sort == "LP") ? "price" :"created_at";
         $sortWay = $request->sort && $request->sort == "HP" ? "desc" : ( $request->sort && $request->sort  == "LP" ? "asc" : "desc");
 
-        $products = Product::with(["gallery", "options"])->orderBy($sortKey, $sortWay)->paginate($per_page);
+        $products = Product::with(["gallery", "options", "additional_data"])->orderBy($sortKey, $sortWay)->paginate($per_page);
 
         $products = $this->addIsFavKey($products, $request->header('Authorization'));
 
@@ -89,7 +90,7 @@ class ProductsController extends Controller
         $sortKey =($request->sort && $request->sort == "HP") || ( $request->sort && $request->sort == "LP") ? "price" :"created_at";
         $sortWay = $request->sort && $request->sort == "HP" ? "desc" : ( $request->sort && $request->sort  == "LP" ? "asc" : "desc");
 
-        $products = Product::with(["gallery", "options"])->orderBy($sortKey, $sortWay)->get();
+        $products = Product::with(["gallery", "options", "additional_data"])->orderBy($sortKey, $sortWay)->get();
 
         $products = $this->addIsFavKey($products, $request->header('Authorization'));
 
@@ -122,7 +123,7 @@ class ProductsController extends Controller
         $sortWay = $request->sort && $request->sort == "HP" ? "desc" : ($request->sort && $request->sort == "LP" ? "asc" : "desc");
         $search = $request->search ? $request->search : '';
 
-        $query = Product::with(["gallery", "options"])
+        $query = Product::with(["gallery", "options", "additional_data"])
             ->where(function($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
                   ->orWhere('description', 'like', '%' . $search . '%');
@@ -303,7 +304,7 @@ class ProductsController extends Controller
             );
         }
 
-        $product = Product::with(["gallery", "options"])->find($request->product_id);
+        $product = Product::with(["gallery", "options", "additional_data"])->find($request->product_id);
 
         if ($product) {
             return $this->handleResponse(
@@ -330,7 +331,7 @@ class ProductsController extends Controller
         $per_page = $request->per_page ? $request->per_page : 10;
 
         $completedOrders = Order::with("products")->where("status", 4)->get();
-        $topProducts = Product::with(["gallery", "options"])->
+        $topProducts = Product::with(["gallery", "options", "additional_data"])->
         withCount('orders') // Count occurrences of each product in orders
         ->orderBy('orders_count', 'desc') // Order by descending count
         ->paginate($per_page);
@@ -356,7 +357,7 @@ class ProductsController extends Controller
     public function getDiscounted(Request $request) {
         $per_page = $request->per_page ? $request->per_page : 10;
 
-        $topProducts = Product::with(["gallery", "options"])->where("isDiscounted", true)
+        $topProducts = Product::with(["gallery", "options", "additional_data"])->where("isDiscounted", true)
         ->paginate($per_page);
 
         $topProducts = $this->addIsFavKey( $topProducts, $request->header('Authorization'));

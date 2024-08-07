@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\HandleResponseTrait;
 use App\SaveImageTrait;
 use App\DeleteImageTrait;
+use App\Models\Additional;
 use App\Models\Product;
 use App\Models\Option;
 use App\Models\Gallery;
@@ -92,6 +93,9 @@ class ProductsController extends Controller
             "quantity" => $request->quantity,
             "price" => $request->price,
             "prev_price" => $request->prev_price,
+            "code" => $request->code,
+            "group" => $request->group,
+            "hashtag" => $request->hashtag,
             "main_image" => '/images/uploads/Products/' . $main_image_name,
             "category_id" => $request->category_id,
         ]);
@@ -114,6 +118,16 @@ class ProductsController extends Controller
                     "flavour" => $option["flavour"] ?? null,
                     "nicotine" => $option["nicotine"] ?? null,
                     "price" => $option["price"] ?? null,
+                ]);
+            }
+        }
+
+        if ($request->additional_data && $product) {
+            foreach ($request->additional_data as $option) {
+                $option = Additional::create([
+                    "product_id" => $product->id,
+                    "key" => $option["key"] ?? null,
+                    "value" => $option["value"] ?? null,
                 ]);
             }
         }
@@ -147,6 +161,10 @@ class ProductsController extends Controller
             "id" => ["required"],
             "name" => ["required"],
             "description" => ["required"],
+            "description" => ["required"],
+            'code'=> ["required"],
+            'group'=> ["required"],
+            'hashtag' => ["required"],
             "quantity" => ["required", "numeric"],
             "price" => ["required", "numeric"],
             "category_id" => ["required"],
@@ -194,6 +212,9 @@ class ProductsController extends Controller
         $product->quantity = $request->quantity;
         $product->price = $request->price;
         $product->prev_price = $request->prev_price;
+        $product->code = $request->code;
+        $product->group = $request->group;
+        $product->hashtag = $request->hashtag;
         $product->category_id = $request->category_id;
 
         if ($request->deleted_gallery) {
@@ -225,6 +246,19 @@ class ProductsController extends Controller
                     "flavour" => $option["flavour"] ?? null,
                     "nicotine" => $option["nicotine"] ?? null,
                     "price" => $option["price"] ?? null,
+                ]);
+            }
+        }
+        foreach ( $product->additional_data as $option) {
+            $option->delete();
+        }
+
+        if ($request->additional_data && $product) {
+            foreach ($request->additional_data as $option) {
+                $option = Additional::create([
+                    "product_id" => $product->id,
+                    "key" => $option["key"] ?? null,
+                    "value" => $option["value"] ?? null,
                 ]);
             }
         }

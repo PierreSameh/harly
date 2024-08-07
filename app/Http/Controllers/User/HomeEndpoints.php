@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\Wishlist;
 use App\Models\Category;
 use App\Models\Banner;
+use Exception;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\PersonalAccessToken;
 class HomeEndpoints extends Controller
@@ -61,7 +62,7 @@ class HomeEndpoints extends Controller
 
     public function getLatestProducts($token) {
         $products = $products = Product::latest()
-        ->with(["gallery", "options"])
+        ->with(["gallery", "options", "additional_data"])
         ->take(15)
         ->get();
 
@@ -72,7 +73,7 @@ class HomeEndpoints extends Controller
     public function getMostSelled($token) {
 
         $completedOrders = Order::with("products")->where("status", 4)->get();
-        $topProducts = Product::with(["gallery", "options"])->
+        $topProducts = Product::with(["gallery", "options", "additional_data"])->
         withCount('orders')
         ->orderBy('orders_count', 'desc')
         ->limit(10)
@@ -84,7 +85,7 @@ class HomeEndpoints extends Controller
     }
     public function getDiscountedProducts($token) {
 
-        $discountedProducts = Product::with(["gallery", "options"])->
+        $discountedProducts = Product::with(["gallery", "options", "additional_data"])->
         where("isDiscounted", true)
         ->limit(10)
         ->get();
