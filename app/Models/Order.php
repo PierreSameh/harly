@@ -11,16 +11,18 @@ class Order extends Model
 
     protected $fillable = [
         "user_id",
-        "your_name",
+        "first_name",
+        "last_name",
+        "phone",
         "your_phone",
-        "your_sec_phone",
-        "recipient_name",
-        "recipient_phone",
-        "recipient_governorate",
-        "recipient_address",
+        "country",
+        "governoment",
+        "city",
+        "address",
+        "email",
+        "whatsapp",
         "sub_total",
         "status",
-        "web_page",
         "notes",
     ];
 

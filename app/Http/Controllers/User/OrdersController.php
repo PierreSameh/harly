@@ -21,35 +21,34 @@ class OrdersController extends Controller
         DB::beginTransaction();
 
         try {
-
             $user = $request->user();
             $cart = $user->cart()->get();
 
-            // check if cart empty
-            if (!$cart || $cart->count() === 0)
+            // Check if cart is empty
+            if (!$cart || $cart->count() === 0) {
                 return $this->handleResponse(
                     false,
                     "",
                     ["العربة فارغة قم بتعبئتها اولا"],
                     [],
-                    [],
+                    []
                 );
+            }
 
-            // validate recipient info
+            // Validate recipient info
             $validator = Validator::make($request->all(), [
-                "your_name" => ["required"],
+                "first_name" => ["required"],
+                "last_name" => ["required"],
                 "your_phone" => ["required"],
-                "recipient_governorate" => ["required"],
-                "recipient_address" => ["required"],
-                "recipient_name" => ["required", "string"],
-                "recipient_phone" => ["required"],
+                "country" => ["required"],
+                "governoment" => ["required"],
+                "city" => ["required"],
+                "address" => ["required"],
+                "email" => ["required", "email"],
             ], [
-                "your_name.required" => "الاسم مطلوب",
                 "your_phone.required" => "رقم الهاتف مطلوب",
-                "recipient_governorate.required" => "محافظة المستلم مطلوبة",
-                "recipient_name.required" => "اسم المستلم مطلوب",
-                "recipient_phone.required" => "رقم هاتف المستلم مطلوب",
-                "recipient_address.required" => "عنوان المستلم مطلوب"
+                "email.required" => "البريد الإلكتروني مطلوب",
+                "email.email" => "البريد الإلكتروني غير صالح",
             ]);
 
             if ($validator->fails()) {
@@ -58,92 +57,70 @@ class OrdersController extends Controller
                     "",
                     [$validator->errors()->first()],
                     [],
-                    [],
+                    []
                 );
             }
 
             $sub_total = 0;
-            // get cart sub total
-            if ($cart->count() > 0)
-                foreach ($cart as $item) {
-                    $item_product = $item->product()->with(["gallery" => function ($q) {
-                        $q->take(1);
-                    }])->first();
-                    if ($item_product) :
-                        $item->total = ((int) $item_product->price * (int) $item->quantity);
-                        $sub_total += $item->total;
-                    endif;
-                    $item->dose_product_missing = $item_product ? false : true;
-                    $item->product = $item_product ?? "This product is missing may deleted!";
+            // Calculate cart sub total
+            foreach ($cart as $item) {
+                $item_product = $item->product()->with(["gallery" => function ($q) {
+                    $q->take(1);
+                }])->first();
+                if ($item_product) {
+                    $item->total = ((int) $item_product->price * (int) $item->quantity);
+                    $sub_total += $item->total;
+                } else {
+                    $item->dose_product_missing = true;
+                    $item->product = "This product is missing may be deleted!";
                 }
+            }
 
-
+            // Create order
             $order = Order::create([
-                "recipient_name"                => $request->recipient_name,
-                "recipient_phone"               => $request->recipient_phone,
-                "recipient_address"             => $request->recipient_address,
-                "sub_total"                     => $sub_total,
-                "user_id"                       => $user->id,
-                "status"                        => 1,
-                "your_name"                     => $request->your_name,
-                "your_phone"                    => $request->your_phone,
-                "your_sec_phone"                => $request->your_sec_phone ?? null,
-                "recipient_governorate"         => $request->recipient_governorate,
-                "notes"                         => $request->notes,
+                "user_id" => $user->id,
+                "first_name" => $request->first_name,
+                "last_name" => $request->last_name,
+                "phone" => $request->your_phone,
+                "your_phone" => $request->your_phone,
+                "country" => $request->country,
+                "governoment" => $request->governoment,
+                "city" => $request->city,
+                "address" => $request->address,
+                "email" => $request->email,
+                "whatsapp" => $request->whatsapp ?? null,
+                "sub_total" => $sub_total,
+                "status" => 1,
+                "notes" => $request->notes,
             ]);
 
             foreach ($cart as $item) {
                 if (!$item->dose_product_missing) {
-                    $record_product = Ordered_Product::create([
+                    Ordered_Product::create([
                         "order_id" => $order->id,
                         "product_id" => $item["product_id"],
                         "price_in_order" => $item["product"]["price"],
                         "ordered_quantity" => $item["quantity"],
                     ]);
+                    $product = Product::find($item["product_id"]);
+                    if ($product) {
+                        $product->quantity = (int) $product->quantity - (int) $item["quantity"];
+                        $product->save();
+                    }
+                    $item->delete();
                 }
-                $product = Product::find($item["product_id"]);
-                if ($product) {
-                    $product->quantity = (int) $product->quantity - (int) $item["quantity"];
-                    $product->save();
-                }
-                $item->delete();
             }
 
             if ($order) {
-                $msg_content = "<h1>";
-                $msg_content = " طلب جديد بواسطة" . $user->name;
-                $msg_content .= "</h1>";
-                $msg_content .= "<br>";
-                $msg_content .= "<h3>";
-                $msg_content .= "تفاصيل الطلب: ";
-                $msg_content .= "</h3>";
-
-                $msg_content .= "<h4>";
-                $msg_content .= "اسم المستلم: ";
-                $msg_content .= $order->recipient_name;
-                $msg_content .= "</h4>";
-
-
-                $msg_content .= "<h4>";
-                $msg_content .= "رقم هاتف المستلم: ";
-                $msg_content .= $order->recipient_phone;
-                $msg_content .= "</h4>";
-
-
-                $msg_content .= "<h4>";
-                $msg_content .= "عنوان المستلم: ";
-                $msg_content .= $order->recipient_address;
-                $msg_content .= "</h4>";
-
-
-                $msg_content .= "<h4>";
-                $msg_content .= "الاجمالي : ";
-                $msg_content .= $order->sub_total;
-                $msg_content .= "</h4>";
-
+                $msg_content = "<h1>طلب جديد بواسطة " . $user->name . "</h1><br>";
+                $msg_content .= "<h3>تفاصيل الطلب:</h3>";
+                $msg_content .= "<h4>اسم المستلم: " . $order->first_name . " " . $order->last_name . "</h4>";
+                $msg_content .= "<h4>رقم هاتف المستلم: " . $order->your_phone . "</h4>";
+                $msg_content .= "<h4>عنوان المستلم: " . $order->address . ", " . $order->city . ", " . $order->governoment . ", " . $order->country . "</h4>";
+                $msg_content .= "<h4>البريد الإلكتروني: " . $order->email . "</h4>";
+                $msg_content .= "<h4>الاجمالي: " . $order->sub_total . "</h4>";
 
                 $this->sendEmail("kotbekareem74@gmail.com", "طلب جديد", $msg_content);
-
             }
 
             DB::commit();
@@ -152,9 +129,7 @@ class OrdersController extends Controller
                 true,
                 "تم اكتمال الطلب بنجاح سوف نتواصل مع المستلم لتاكيد وارسال الطلب",
                 [],
-                [
-                    $order
-                ],
+                [$order],
                 []
             );
 
