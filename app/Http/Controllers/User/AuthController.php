@@ -597,41 +597,6 @@ class AuthController extends Controller
     }
 
     public function update(Request $request) {
-        $validator = Validator::make($request->all(), [
-            'picture' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-            "name" => ['regex:/^[\p{L} ]{3,}\s[\p{L} ]{3,}\s[\p{L} ]{3,}$/u'],
-            "phone" => ["unique:users,phone"],
-        ], [
-            "name.required" => "ادخل اسمك الثلاثي",
-            "name.regex" => "ادخل الاسم ثلاثي",
-            "phone.unique" => "هذا الرقم موجود بالفعل",
-            "picture.image" => "من فضلك ارفع صورة صالحة",
-            "picture.mimes" => "يجب ان تكون الصورة بين هذه الصيغ (jpeg, png, jpg, gif)",
-            "picture.max" => "يجب الا يتعدى حجم الصورة 2 ميجا",
-        ]);
-
-        if ($validator->fails()) {
-            return $this->handleResponse(
-                false,
-                "",
-                [$validator->errors()->first()],
-                [],
-                [
-                    "validation" => [
-                        "phone" => "متبعتش الرقم في التعديل غير لو اتغير لاني مش هيعدي لو نفس القديم",
-                        "picture" => "لازم تكون صورة وتكون اقل من 2 ميجا",
-                        "name" => "الاسم لازم ثلاثي",
-                        "general" => "مفيش حاجة مطلوبة انت اللي يتعدل ابعته لو معدلش متبعتش ال key عادي"
-                    ],
-                    "joind_with" => [
-                        "1" => "تعني تسجيل يدوي",
-                        "2" => "تعني تسجيل عن طريق جوجل ولا يشترط ارسال كلمة مرور",
-                        "3" => "تعني تسجيل عن طريق فيس بوك ولا يشترط ارسال كلمة مرور",
-                    ]
-                ]
-            );
-        }
-
 
         $user = $request->user();
 
