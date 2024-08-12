@@ -29,5 +29,10 @@ class Cart extends Model
     {
         return $this->belongsTo('App\Models\Product', 'product_id');
     }
+    public function option()
+    {
+        return $this->belongsTo('App\Models\Option', 'option_id');
+    }
+
 
 }
