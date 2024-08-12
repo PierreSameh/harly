@@ -147,6 +147,7 @@
             <th scope="col">Flavour</th>
             <th scope="col">Nicotine</th>
             <th scope="col">Price</th>
+            <th scope="col">Photo</th>
             <th></th>
           </tr>
         </thead>
@@ -163,6 +164,10 @@
             </td>
             <td>
                 <input type="text" name="Price" id="Price" class="form-control" placeholder="Price" v-model="options[index]['price']">
+            </td>
+            <td>
+                <input type="file" class="form-control" @change="handleOptionPhotoChange($event, index)">
+                <img v-if="options[index].photo_path" :src="options[index].photo_path" style="width: 100px; height: 100px; object-fit: cover; margin-top: 10px;" />
             </td>
             <td>
                 <button class="btn btn-danger" @click="handleRemoveOption(index)">Remove</button>
@@ -218,6 +223,8 @@ createApp({
                 flavour: "",
                 nicotine: "",
                 price: "",
+                photo: null,
+                photo_path: null
             })
         },
         handleRemoveOption(index) {
@@ -241,6 +248,11 @@ createApp({
             let arr_paths  = this.images_path
             arr_paths.splice(index, 1)
             this.images_path = arr_paths
+        },
+        handleOptionPhotoChange(event, index) {
+            const file = event.target.files[0];
+            this.options[index].photo = file;
+            this.options[index].photo_path = URL.createObjectURL(file);
         },
         async create() {
             $('.loader').fadeIn().css('display', 'flex')

@@ -31,6 +31,11 @@ class Order extends Model
         return $this->belongsTo('App\Models\User', 'user_id');
     }
 
+    public function option()
+    {
+        return $this->belongsTo('App\Models\Option', 'option_id');
+    }
+
     public function products()
     {
         return $this->hasMany('App\Models\Ordered_Product', 'order_id');

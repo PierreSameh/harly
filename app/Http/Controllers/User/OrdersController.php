@@ -22,7 +22,7 @@ class OrdersController extends Controller
 
         try {
             $user = $request->user();
-            $cart = $user->cart()->get();
+            $cart = $user->cart()->with("option")->get();
 
             // Check if cart is empty
             if (!$cart || $cart->count() === 0) {
@@ -99,6 +99,7 @@ class OrdersController extends Controller
                     Ordered_Product::create([
                         "order_id" => $order->id,
                         "product_id" => $item["product_id"],
+                        "option_id" => $item["option_id"],
                         "price_in_order" => $item["product"]["price"],
                         "ordered_quantity" => $item["quantity"],
                     ]);

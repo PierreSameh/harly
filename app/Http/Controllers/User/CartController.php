@@ -17,6 +17,7 @@ class CartController extends Controller
         $validator = Validator::make($request->all(), [
             "product_id" => ["required"],
             "quantity" => ["numeric"],
+            "option_id" => ["nullable"], // Validate option_id if provided
         ]);
 
         if ($validator->fails()) {
@@ -33,10 +34,14 @@ class CartController extends Controller
 
         $product = Product::find($request->product_id);
         $quantity = $request->quantity ? $request->quantity : 1;
+        $option_id = $request->input('option_id', '');
 
         if ($product) {
             $user = $request->user();
-            $product_if_in_user_cart = $user->cart()->where("product_id", $request->product_id)->first();
+            $product_if_in_user_cart = $user->cart()->where("product_id", $request->product_id)
+                                                 ->where("option_id", $option_id)
+                                                 ->first();
+
             if ($product_if_in_user_cart) {
                 $prod_quantity = (int) $product_if_in_user_cart->quantity + (int) $quantity;
                 if ((int) $prod_quantity > (int) $product->quantity)
@@ -53,16 +58,15 @@ class CartController extends Controller
                 $product_if_in_user_cart->quantity = $prod_quantity;
                 $product_if_in_user_cart->save();
 
-                if ($product_if_in_user_cart)
-                    return $this->handleResponse(
-                        true,
-                        "تم اضافة المنتج للعربة بنجاح",
-                        [],
-                        [],
-                        [
-                            "في حالة كان المنتج موجود في عربة المستخم فالكمية تزداد بواحد او بالعدد المرسل من المستخدم في ال quantity"
-                        ]
-                    );
+                return $this->handleResponse(
+                    true,
+                    "تم اضافة المنتج للعربة بنجاح",
+                    [],
+                    [],
+                    [
+                        "في حالة كان المنتج موجود في عربة المستخم فالكمية تزداد بواحد او بالعدد المرسل من المستخدم في ال quantity"
+                    ]
+                );
             } else {
                 if ((int) $quantity > (int) $product->quantity)
                     return $this->handleResponse(
@@ -75,22 +79,22 @@ class CartController extends Controller
                         ]
                     );
 
-
                 $cart_item = Cart::create([
                     "user_id" => $user->id,
                     "product_id" => $product->id,
-                    "quantity" => $quantity
+                    "quantity" => $quantity,
+                    "option_id" => $option_id, // Add option_id here
                 ]);
-                if ($cart_item)
-                    return $this->handleResponse(
-                        true,
-                        "تم اضافة المنتج للعربة بنجاح",
-                        [],
-                        [],
-                        [
-                            "في حالة كان المنتج موجود في عربة المستخم فالكمية تزداد بواحد او بالعدد المرسل من المستخدم في ال quantity"
-                        ]
-                    );
+
+                return $this->handleResponse(
+                    true,
+                    "تم اضافة المنتج للعربة بنجاح",
+                    [],
+                    [],
+                    [
+                        "في حالة كان المنتج موجود في عربة المستخم فالكمية تزداد بواحد او بالعدد المرسل من المستخدم في ال quantity"
+                    ]
+                );
             }
         } else {
             return $this->handleResponse(
@@ -103,7 +107,6 @@ class CartController extends Controller
                 ]
             );
         }
-
     }
 
     public function removeProductFromCart(Request $request) {
@@ -217,7 +220,7 @@ class CartController extends Controller
 
     public function getCartDetails(Request $request) {
         $user = $request->user();
-        $cart = $user->cart()->get();
+        $cart = $user->cart()->with("option")->get();
         $sub_total = 0;
 
         if ($cart->count() > 0)

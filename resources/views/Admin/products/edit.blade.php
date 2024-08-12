@@ -163,6 +163,7 @@
             <th scope="col">Flavour</th>
             <th scope="col">Nicotine</th>
             <th scope="col">Price</th>
+            <th scope="col">Photo</th>
             <th></th>
           </tr>
         </thead>
@@ -179,6 +180,10 @@
             </td>
             <td>
                 <input type="text" name="Price" id="Price" class="form-control" placeholder="Price" v-model="options[index]['price']">
+            </td>
+            <td>
+                <input type="file" class="form-control" @change="handleOptionPhotoChange($event, index)">
+                <img v-if="options[index].photo" :src="options[index].photo_path || options[index].photo" style="width: 100px; height: 100px; object-fit: cover; margin-top: 10px;" />
             </td>
             <td>
                 <button class="btn btn-danger" @click="handleRemoveOption(index)">Remove</button>
@@ -229,6 +234,16 @@ createApp({
                 value: ""
             });
         },
+        handleAddOption() {
+            this.options.push({
+                size: "",
+                flavour: "",
+                nicotine: "",
+                price: "",
+                photo: null,
+                photo_path: null
+            })
+        },
         handleRemoveAdditionalData(index) {
             this.additional_data.splice(index, 1);
         },
@@ -246,6 +261,11 @@ createApp({
         handleChangeThumbnail(event) {
             this.thumbnail = event.target.files[0]
             this.thumbnail_path = URL.createObjectURL(event.target.files[0])
+        },
+        handleOptionPhotoChange(event, index) {
+            const file = event.target.files[0];
+            this.options[index].photo = file;
+            this.options[index].photo_path = URL.createObjectURL(file);
         },
         handleChangeThumbnail(event) {
             this.thumbnail = event.target.files[0]

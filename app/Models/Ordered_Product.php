@@ -14,6 +14,7 @@ class Ordered_Product extends Model
         "order_id",
         "product_id",
         "price_in_order",
+        "option_id",
         "ordered_quantity",
     ];
 
@@ -25,6 +26,11 @@ class Ordered_Product extends Model
     public function order()
     {
         return $this->belongsTo('App\Models\Order', 'order_id');
+    }
+
+    public function option()
+    {
+        return $this->belongsTo('App\Models\Option', 'option_id');
     }
 
     public function product()

@@ -112,12 +112,17 @@ class ProductsController extends Controller
 
         if ($request->options && $product) {
             foreach ($request->options as $option) {
+                $photo = null;
+                if ($option['photo']) {
+                    $photo = $this->saveImg($option['photo'], 'images/uploads/Options');
+                }
                 $option = Option::create([
                     "product_id" => $product->id,
                     "size" => $option["size"] ?? null,
                     "flavour" => $option["flavour"] ?? null,
                     "nicotine" => $option["nicotine"] ?? null,
                     "price" => $option["price"] ?? null,
+                    "photo" => $option["photo"] ? '/images/uploads/Options/' . $photo : null,
                 ]);
             }
         }
@@ -239,15 +244,21 @@ class ProductsController extends Controller
         }
         if ($request->options && $product) {
 
+
             foreach ($request->options as $option) {
-                $option = Option::create([
-                    "product_id" => $product->id,
-                    "size" => $option["size"] ?? null,
-                    "flavour" => $option["flavour"] ?? null,
-                    "nicotine" => $option["nicotine"] ?? null,
-                    "price" => $option["price"] ?? null,
-                ]);
-            }
+                    $photo = null;
+                    if ($option['photo']) {
+                        $photo = $this->saveImg($option['photo'], 'images/uploads/Options');
+                    }
+                    $option = Option::create([
+                        "product_id" => $product->id,
+                        "size" => $option["size"] ?? null,
+                        "flavour" => $option["flavour"] ?? null,
+                        "nicotine" => $option["nicotine"] ?? null,
+                        "price" => $option["price"] ?? null,
+                        "photo" => $option["photo"] ? '/images/uploads/Options/' . $photo : null,
+                    ]);
+                }
         }
         foreach ( $product->additional_data as $option) {
             $option->delete();

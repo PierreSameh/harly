@@ -13,6 +13,7 @@ class Option extends Model
         'size',
         'flavour',
         'nicotine',
+        'photo',
         'price'
     ];
 
