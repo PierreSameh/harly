@@ -35,7 +35,7 @@ class CartController extends Controller
 
         $product = Product::find($request->product_id);
         $quantity = $request->quantity ? $request->quantity : 1;
-        $option_id = $request->input('option_id', '');
+        $option_id = $request->input('option_id', null);
 
         if ($product) {
             $user = $request->user();
