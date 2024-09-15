@@ -84,7 +84,7 @@ class CartController extends Controller
                     "user_id" => $user->id,
                     "product_id" => $product->id,
                     "quantity" => $quantity,
-                    "option_id" => $option_id, // Add option_id here
+                    "option_id" => $option_id ?? null, // Add option_id here
                 ]);
 
                 return $this->handleResponse(
