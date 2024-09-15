@@ -14,6 +14,7 @@ class CartController extends Controller
     use HandleResponseTrait;
 
     public function addProductToCart(Request $request) {
+        try{
         $validator = Validator::make($request->all(), [
             "product_id" => ["required"],
             "quantity" => ["numeric"],
@@ -105,6 +106,17 @@ class CartController extends Controller
                 [
                     "في حالة كان المنتج موجود في عربة المستخم فالكمية تزداد بواحد او بالعدد المرسل من المستخدم في ال quantity"
                 ]
+            );
+        }
+        } catch (\Exception $e) {
+            return $this->handleResponse(
+                false,
+                "Error Signing UP",
+                [
+                    $e->getMessage()
+                ],
+                [],
+                []
             );
         }
     }
