@@ -27,7 +27,7 @@ class CategoriesController extends Controller
 
     public function search(Request $request) {
         $search = $request->search ? $request->search : '';
-        $categories = Category::latest()->where('name', 'like', '%' . $search . '%')
+        $categories = Category::where('name', 'like', '%' . $search . '%')
         ->orWhere('description', 'like', '%' . $search . '%')->orderBy('position', 'asc')->get();
 
         return $this->handleResponse(
