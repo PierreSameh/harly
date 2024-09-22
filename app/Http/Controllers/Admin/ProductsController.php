@@ -166,7 +166,6 @@ class ProductsController extends Controller
             "id" => ["required"],
             "name" => ["required"],
             "description" => ["required"],
-            "description" => ["required"],
             'code'=> ["required"],
             'group'=> ["required"],
             'hashtag' => ["required"],
@@ -249,6 +248,15 @@ class ProductsController extends Controller
                     $photo = null;
                     if ($option['photo']) {
                         $photo = $this->saveImg($option['photo'], 'images/uploads/Options');
+                    }
+                    $exists = Option::where('id', $option['id'])->first();
+                    if($exists){
+                        $exists->size = $option['size'];
+                        $exists->flavour = $option['flavour'];
+                        $exists->nicotine = $option['nicotine'];
+                        $exists->price = $option['price'];
+                        $exists->photo = $option["photo"] ? '/images/uploads/Options/' . $photo : null;
+                        $exists->save();
                     }
                     $option = Option::create([
                         "product_id" => $product->id,
