@@ -196,7 +196,16 @@
         <button class="btn btn-success w-25" @click="update" style="display: block;margin: auto">Update</button>
     </div>
 </div>
-
+@if ($errors->any())
+<div class="alert alert-danger">
+    <ul>
+    @foreach ($errors->all() as $error)
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">X</button>
+        <li>{{ $error }}</li>
+    @endforeach
+    </ul>
+</div>
+@endif
 @endSection
 
 @section("scripts")
