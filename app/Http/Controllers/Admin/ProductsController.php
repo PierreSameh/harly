@@ -294,7 +294,7 @@ class ProductsController extends Controller
                 []
             );
         } catch(\Exception $e){
-            return redirect()->back()->withErrors($e->getMessage());
+            return redirect()->back()->with("error",$e->getMessage());
         }
 
 
