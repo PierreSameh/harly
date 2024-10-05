@@ -359,7 +359,7 @@ createApp({
                 document.getElementById('errors').innerHTML = ''
                 let err = document.createElement('div')
                 err.classList = 'error'
-                err.innerHTML = 'server error try again later'
+                err.innerHTML = {{$error}}
                 document.getElementById('errors').append(err)
                 $('#errors').fadeIn('slow')
                 $('.loader').fadeOut()
