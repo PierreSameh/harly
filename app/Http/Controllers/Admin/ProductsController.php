@@ -162,6 +162,7 @@ class ProductsController extends Controller
     }
 
     public function update(Request $request) {
+        try{
         $validator = Validator::make($request->all(), [
             "id" => ["required"],
             "name" => ["required"],
@@ -292,6 +293,16 @@ class ProductsController extends Controller
                 [],
                 []
             );
+        } catch(\Exception $e){
+            return $this->handleResponse(
+                false,
+                "",
+                [$e->getMessage()],
+                [],
+                []
+            );
+        }
+
 
     }
 
