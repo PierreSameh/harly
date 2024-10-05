@@ -359,7 +359,7 @@ createApp({
                 document.getElementById('errors').innerHTML = ''
                 let err = document.createElement('div')
                 err.classList = 'error'
-                err.innerHTML = {{$error}}
+                err.innerHTML = response.data.message
                 document.getElementById('errors').append(err)
                 $('#errors').fadeIn('slow')
                 $('.loader').fadeOut()
