@@ -246,7 +246,6 @@ class ProductsController extends Controller
 
 
             foreach ($request->options as $option) {
-                dd($option);
                     $photo = null;
                     if ($option['photo']) {
                         $photo = $this->saveImg($option['photo'], 'images/uploads/Options');
