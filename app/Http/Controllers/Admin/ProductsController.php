@@ -243,33 +243,39 @@ class ProductsController extends Controller
             $option->delete();
         }
         if ($request->options && $product) {
-
-
             foreach ($request->options as $option) {
-                    $photo = null;
-                    if ($option['photo']) {
-                        $photo = $this->saveImg($option['photo'], 'images/uploads/Options');
-                    }
-                    $exists = Option::where('id', $option['id'])->first();
-                    if($exists){
-                        $exists->size = $option['size'];
-                        $exists->flavour = $option['flavour'];
-                        $exists->nicotine = $option['nicotine'];
-                        $exists->price = $option['price'];
-                        $exists->photo = $option["photo"] ? '/images/uploads/Options/' . $photo : null;
-                        $exists->save();
-                    }
-
-                    $option = Option::create([
+                $photo = null;
+                
+                // Check if 'photo' exists and is not null
+                if (isset($option['photo'])) {
+                    $photo = $this->saveImg($option['photo'], 'images/uploads/Options');
+                }
+        
+                // Check if 'id' exists to update, or create a new record if not
+                $exists = isset($option['id']) ? Option::find($option['id']) : null;
+        
+                if ($exists) {
+                    // Update existing option
+                    $exists->size = $option['size'] ?? null;
+                    $exists->flavour = $option['flavour'] ?? null;
+                    $exists->nicotine = $option['nicotine'] ?? null;
+                    $exists->price = $option['price'] ?? null;
+                    $exists->photo = $photo ? '/images/uploads/Options/' . $photo : null;
+                    $exists->save();
+                } else {
+                    // Create a new option
+                    Option::create([
                         "product_id" => $product->id,
                         "size" => $option["size"] ?? null,
                         "flavour" => $option["flavour"] ?? null,
                         "nicotine" => $option["nicotine"] ?? null,
                         "price" => $option["price"] ?? null,
-                        "photo" => $option["photo"] ? '/images/uploads/Options/' . $photo : null,
+                        "photo" => $photo ? '/images/uploads/Options/' . $photo : null,
                     ]);
                 }
+            }
         }
+        
         foreach ( $product->additional_data as $option) {
             $option->delete();
         }
