@@ -250,6 +250,7 @@ class ProductsController extends Controller
                     if ($option['photo']) {
                         $photo = $this->saveImg($option['photo'], 'images/uploads/Options');
                     }
+                    if($option){
                     $exists = Option::where('id', $option['id'])->first();
                     if($exists){
                         $exists->size = $option['size'];
@@ -258,6 +259,7 @@ class ProductsController extends Controller
                         $exists->price = $option['price'];
                         $exists->photo = $option["photo"] ? '/images/uploads/Options/' . $photo : null;
                         $exists->save();
+                    }
                     }
                     $option = Option::create([
                         "product_id" => $product->id,
