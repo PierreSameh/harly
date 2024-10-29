@@ -233,6 +233,12 @@
                     </div>
                 </div>
             </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="{{route('admin.get.rates')}}">
+                    <i class="fas fa-fw fa-ad"></i>
+                    <span>اسعار الشحن</span>
+                </a>
+            </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">

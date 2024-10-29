@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ShipController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ProductsController;
@@ -70,5 +71,10 @@ Route::prefix('admin')->group(function () {
             Route::post("/order/cancel/confirm/{id}", [OrdersController::class, "cancel"])->name("admin.orders.cancel.post");
             Route::get("/order/success/{id}", [OrdersController::class, "successIndex"])->name("admin.orders.success");
         });
+        Route::get('/ship/rates', [ShipController::class, 'getShip'])->name('admin.get.rates');
+        Route::post('/ship/rates/add-new', [ShipController::class,'store'])->name('admin.store.rates');
+        Route::get('/ship/rate/{rate}/edit', [ShipController::class,'edit'])->name('admin.edit.rates');
+        Route::post('/ship/rate/{rate}/update', [ShipController::class,'update'])->name('admin.update.rates');
+        Route::post('/ship/rate/{rate}/delete', [ShipController::class,'delete'])->name('admin.delete.rates');
     });
 });
