@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\User\ShipRateController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\AuthController;
@@ -61,3 +62,5 @@ Route::get("/orders/user/request/withdraw/get", [OrdersController::class, "getRe
 // Home endpoints
 Route::get("/home/load-data", [HomeEndpoints::class, "getHomeApi"]);
 
+//ShipRate
+Route::post('/shipping-rates', [ShipRateController::class, 'get']);

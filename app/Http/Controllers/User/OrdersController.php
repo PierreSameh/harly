@@ -45,6 +45,7 @@ class OrdersController extends Controller
                 "city" => ["required"],
                 "address" => ["required"],
                 "email" => ["required", "email"],
+                'ship_rate' => ['required', 'numeric']
             ], [
                 "your_phone.required" => "رقم الهاتف مطلوب",
                 "email.required" => "البريد الإلكتروني مطلوب",
@@ -61,7 +62,7 @@ class OrdersController extends Controller
                 );
             }
 
-            $sub_total = 0;
+            $sub_total = $request->ship_rate;
             // Calculate cart sub total
             foreach ($cart as $item) {
                 $item_product = $item->product()->with(["gallery" => function ($q) {
