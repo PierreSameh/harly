@@ -234,7 +234,11 @@ createApp({
             const category = this.categories.find(c => c.id === this.category_id);
             if (!category) return [];
             // Convert category name to snake_case to match categoryOptions keys
-            const categoryKey = category.name.toLowerCase().replace(/ /g, '_');
+            const categoryKey = category.name
+            .toLowerCase()
+                .replace(/&/g, 'and')  // Replace & with 'and'
+                .replace(/[^a-z0-9]+/g, '_')  // Replace any special chars or spaces with underscore
+                .replace(/^_+|_+$/g, '');  
             return this.categoryOptions[categoryKey] || [];
         }
     },
