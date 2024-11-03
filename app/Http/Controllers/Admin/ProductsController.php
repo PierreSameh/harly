@@ -112,17 +112,18 @@ class ProductsController extends Controller
 
         if ($request->options && $product) {
             foreach ($request->options as $option) {
-                $photo = null;
-                if ($option['photo']) {
-                    $photo = $this->saveImg($option['photo'], 'images/uploads/Options');
-                }
+                $photo = array_key_exists('photo', $option) && $option['photo'] ? 
+                $this->saveImg($option['photo'], 'images/uploads/Options') : null;
                 $option = Option::create([
                     "product_id" => $product->id,
                     "size" => $option["size"] ?? null,
                     "flavour" => $option["flavour"] ?? null,
                     "nicotine" => $option["nicotine"] ?? null,
                     "price" => $option["price"] ?? null,
-                    "photo" => $option["photo"] ? '/images/uploads/Options/' . $photo : null,
+                    "photo" => $photo ? '/images/uploads/Options/' . $photo : null,
+                    "color" => $option["color"] ?? null,
+                    "resistance" => $option['resistance'] ?? null,
+                    "quantity" =>$option['quantity'] ?? null
                 ]);
             }
         }

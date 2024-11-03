@@ -136,45 +136,58 @@
             </tr>
         </tbody>
     </table>
-     <div class="d-flex justify-content-between mb-4">
+    <div class="d-flex justify-content-between mb-4" v-if="category_id">
         <h2>Does this product has options?</h2>
         <button class="btn btn-primary" @click="handleAddOption">Add Option</button>
-     </div>
-     <table class="table" v-if="options && options.length > 0">
+    </div>
+    <table class="table" v-if="options.length > 0 && category_id">
         <thead>
-          <tr>
-            <th scope="col">Size</th>
-            <th scope="col">Flavour</th>
-            <th scope="col">Nicotine</th>
-            <th scope="col">Price</th>
-            <th scope="col">Photo</th>
-            <th></th>
-          </tr>
+            <tr>
+                <th scope="col" v-if="availableFields.includes('size')">Size</th>
+                <th scope="col" v-if="availableFields.includes('flavour')">Flavour</th>
+                <th scope="col" v-if="availableFields.includes('nicotine')">Nicotine</th>
+                <th scope="col" v-if="availableFields.includes('color')">Color</th>
+                <th scope="col" v-if="availableFields.includes('resistance')">Resistance</th>
+                <th scope="col">Price</th>
+                <th scope="col">Quantity</th>
+                <th scope="col" v-if="availableFields.includes('photo')">Photo</th>
+                <th></th>
+            </tr>
         </thead>
         <tbody>
-          <tr v-for="option, index in options" :key="index">
-            <td>
-                <input type="text" name="size" id="size" class="form-control" placeholder="Size" v-model="options[index]['size']">
-            </td>
-            <td>
-                <input type="text" name="Flavour" id="Flavour" class="form-control" placeholder="Flavour" v-model="options[index]['flavour']">
-            </td>
-            <td>
-                <input type="text" name="Nicotine" id="Nicotine" class="form-control" placeholder="Nicotine" v-model="options[index]['nicotine']">
-            </td>
-            <td>
-                <input type="text" name="Price" id="Price" class="form-control" placeholder="Price" v-model="options[index]['price']">
-            </td>
-            <td>
-                <input type="file" class="form-control" @change="handleOptionPhotoChange($event, index)">
-                <img v-if="options[index].photo_path" :src="options[index].photo_path" style="width: 100px; height: 100px; object-fit: cover; margin-top: 10px;" />
-            </td>
-            <td>
-                <button class="btn btn-danger" @click="handleRemoveOption(index)">Remove</button>
-            </td>
-          </tr>
+            <tr v-for="(option, index) in options" :key="index">
+                <td v-if="availableFields.includes('size')">
+                    <input type="text" class="form-control" placeholder="Size" v-model="options[index].size">
+                </td>
+                <td v-if="availableFields.includes('flavour')">
+                    <input type="text" class="form-control" placeholder="Flavour" v-model="options[index].flavour">
+                </td>
+                <td v-if="availableFields.includes('nicotine')">
+                    <input type="text" class="form-control" placeholder="Nicotine" v-model="options[index].nicotine">
+                </td>
+                <td v-if="availableFields.includes('color')">
+                    <input type="text" class="form-control" placeholder="Color" v-model="options[index].color">
+                </td>
+                <td v-if="availableFields.includes('resistance')">
+                    <input type="text" class="form-control" placeholder="Resistance" v-model="options[index].resistance">
+                </td>
+                <td>
+                    <input type="number" class="form-control" placeholder="Price" v-model="options[index].price">
+                </td>
+                <td>
+                    <input type="number" class="form-control" placeholder="Quantity" v-model="options[index].quantity">
+                </td>
+                <td v-if="availableFields.includes('photo')">
+                    <input type="file" class="form-control" @change="handleOptionPhotoChange($event, index)">
+                    <img v-if="options[index].photo_path" :src="options[index].photo_path" 
+                         style="width: 100px; height: 100px; object-fit: cover; margin-top: 10px;" />
+                </td>
+                <td>
+                    <button class="btn btn-danger" @click="handleRemoveOption(index)">Remove</button>
+                </td>
+            </tr>
         </tbody>
-      </table>
+    </table>
     <div class="form-group">
         <button class="btn btn-success w-25" @click="create" style="display: block;margin: auto">Create</button>
     </div>
@@ -204,7 +217,25 @@ createApp({
             images_path: [],
             options: [],
             additional_data: [],
-            images: []
+            images: [],
+            categoryOptions: {
+                'vape_kits': ['color', 'photo'],
+                'premium_liquid': ['nicotine', 'flavour', 'size', 'photo'],
+                'egyptian_liquid': ['nicotine', 'flavour', 'size', 'photo'],
+                'disposables': ['flavour', 'photo'],
+                'vape_coil_and_cartridge': ['resistance'],
+                'vape_pod': ['color', 'photo'],
+                'batteries': ['resistance']
+            }
+        }
+    },
+    computed: {
+        availableFields() {
+            const category = this.categories.find(c => c.id === this.category_id);
+            if (!category) return [];
+            // Convert category name to snake_case to match categoryOptions keys
+            const categoryKey = category.name.toLowerCase().replace(/ /g, '_');
+            return this.categoryOptions[categoryKey] || [];
         }
     },
     methods: {
@@ -223,9 +254,12 @@ createApp({
                 flavour: "",
                 nicotine: "",
                 price: "",
-                photo: null,
+                quantity: 0,
+                color: null,
+                resistance: null,
+                photo: null, // Set to null explicitly
                 photo_path: null
-            })
+            });
         },
         handleRemoveOption(index) {
             this.options.splice(index, 1)
@@ -257,6 +291,19 @@ createApp({
         async create() {
             $('.loader').fadeIn().css('display', 'flex')
             try {
+                const optionsToSend = this.options.map(option => {
+                return {
+                    size: option.size,
+                    flavour: option.flavour,
+                    nicotine: option.nicotine,
+                    price: option.price,
+                    quantity: option.quantity,
+                    color: option.color,
+                    resistance: option.resistance,
+                    photo: option.photo !== undefined ? option.photo : null // Ensure photo is set to null if not defined
+                };
+            });
+            console.log(optionsToSend); // Log the options to see their structure
                 const response = await axios.post(`{{ route("admin.products.create") }}`, {
                     name: this.name,
                     description: this.description,
@@ -266,7 +313,7 @@ createApp({
                     images: this.images,
                     category_id: this.category_id,
                     main_image: this.thumbnail,
-                    options: this.options,
+                    options: optionsToSend, // Filter out options without photo
                     hashtag: this.hashtag,
                     group: this.group,
                     code: this.code,
@@ -279,6 +326,7 @@ createApp({
                 },
                 );
                 if (response.data.status === true) {
+                    console.log(response.data);
                     document.getElementById('errors').innerHTML = ''
                     let error = document.createElement('div')
                     error.classList = 'success'
@@ -291,6 +339,8 @@ createApp({
                         window.location.href = '{{ route("admin.products.show") }}'
                     }, 1300);
                 } else {
+                    console.log(response.data);
+
                     $('.loader').fadeOut()
                     document.getElementById('errors').innerHTML = ''
                     $.each(response.data.errors, function (key, value) {

@@ -14,7 +14,10 @@ class Option extends Model
         'flavour',
         'nicotine',
         'photo',
-        'price'
+        'price',
+        'color',
+        'resistance',
+        'quantity'
     ];
 
     public $timestamps = false;
