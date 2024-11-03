@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Option;
 use Illuminate\Http\Request;
 use App\HandleResponseTrait;
 use App\Models\Order;
@@ -67,10 +68,15 @@ class OrdersController extends Controller
             foreach ($cart as $item) {
                 $item_product = $item->product()->with(["gallery" => function ($q) {
                     $q->take(1);
-                }])->first();
+                },])->first();
+                $item_option = $item->option;
                 if ($item_product) {
-                    $item->total = ((int) $item_product->price * (int) $item->quantity);
-                    $sub_total += $item->total;
+                    if($item_option){
+                        $item->total = ((int) $item_option->price * (int) $item->quantity);
+                    } else {
+                        $item->total = ((int) $item_product->price * (int) $item->quantity);
+                    }
+                $sub_total += $item->total;
                 } else {
                     $item->dose_product_missing = true;
                     $item->product = "This product is missing may be deleted!";
@@ -101,11 +107,15 @@ class OrdersController extends Controller
                         "order_id" => $order->id,
                         "product_id" => $item["product_id"],
                         "option_id" => $item["option_id"],
-                        "price_in_order" => $item["product"]["price"],
+                        "price_in_order" => $item->option ? $item->option->price : $item->product->price,
                         "ordered_quantity" => $item["quantity"],
                     ]);
                     $product = Product::find($item["product_id"]);
-                    if ($product) {
+                    $option = Option::find($item['option_id']);
+                    if($option){
+                        $option->quantity -= (int) $item["quantity"];
+                        $option->save();
+                    } elseif ($product) {
                         $product->quantity = (int) $product->quantity - (int) $item["quantity"];
                         $product->save();
                     }
