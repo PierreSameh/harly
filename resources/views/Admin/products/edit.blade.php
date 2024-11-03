@@ -152,45 +152,58 @@
             </tr>
         </tbody>
     </table>
-     <div class="d-flex justify-content-between mb-4">
+    <div class="d-flex justify-content-between mb-4" v-if="category_id">
         <h2>Does this product has options?</h2>
         <button class="btn btn-primary" @click="handleAddOption">Add Option</button>
-     </div>
-     <table class="table" v-if="options && options.length > 0">
+    </div>
+    <table class="table" v-if="options.length > 0 && category_id">
         <thead>
-          <tr>
-            <th scope="col">Size</th>
-            <th scope="col">Flavour</th>
-            <th scope="col">Nicotine</th>
-            <th scope="col">Price</th>
-            <th scope="col">Photo</th>
-            <th></th>
-          </tr>
+            <tr>
+                <th scope="col" v-if="availableFields.includes('size')">Size</th>
+                <th scope="col" v-if="availableFields.includes('flavour')">Flavour</th>
+                <th scope="col" v-if="availableFields.includes('nicotine')">Nicotine</th>
+                <th scope="col" v-if="availableFields.includes('color')">Color</th>
+                <th scope="col" v-if="availableFields.includes('resistance')">Resistance</th>
+                <th scope="col">Price</th>
+                <th scope="col">Quantity</th>
+                <th scope="col" v-if="availableFields.includes('photo')">Photo</th>
+                <th></th>
+            </tr>
         </thead>
         <tbody>
-          <tr v-for="option, index in options" :key="index">
-            <td>
-                <input type="text" name="size" id="size" class="form-control" placeholder="Size" v-model="options[index]['size']">
-            </td>
-            <td>
-                <input type="text" name="Flavour" id="Flavour" class="form-control" placeholder="Flavour" v-model="options[index]['flavour']">
-            </td>
-            <td>
-                <input type="text" name="Nicotine" id="Nicotine" class="form-control" placeholder="Nicotine" v-model="options[index]['nicotine']">
-            </td>
-            <td>
-                <input type="text" name="Price" id="Price" class="form-control" placeholder="Price" v-model="options[index]['price']">
-            </td>
-            <td>
-                <input type="file" class="form-control" @change="handleOptionPhotoChange($event, index)">
-                <img v-if="options[index].photo" :src="options[index].photo_path || options[index].photo" style="width: 100px; height: 100px; object-fit: cover; margin-top: 10px;" />
-            </td>
-            <td>
-                <button class="btn btn-danger" @click="handleRemoveOption(index)">Remove</button>
-            </td>
-          </tr>
+            <tr v-for="(option, index) in options" :key="index">
+                <td v-if="availableFields.includes('size')">
+                    <input type="text" class="form-control" placeholder="Size" v-model="options[index].size">
+                </td>
+                <td v-if="availableFields.includes('flavour')">
+                    <input type="text" class="form-control" placeholder="Flavour" v-model="options[index].flavour">
+                </td>
+                <td v-if="availableFields.includes('nicotine')">
+                    <input type="text" class="form-control" placeholder="Nicotine" v-model="options[index].nicotine">
+                </td>
+                <td v-if="availableFields.includes('color')">
+                    <input type="text" class="form-control" placeholder="Color" v-model="options[index].color">
+                </td>
+                <td v-if="availableFields.includes('resistance')">
+                    <input type="text" class="form-control" placeholder="Resistance" v-model="options[index].resistance">
+                </td>
+                <td>
+                    <input type="number" class="form-control" placeholder="Price" v-model="options[index].price">
+                </td>
+                <td>
+                    <input type="number" class="form-control" placeholder="Quantity" v-model="options[index].quantity">
+                </td>
+                <td v-if="availableFields.includes('photo')">
+                    <input type="file" class="form-control" @change="handleOptionPhotoChange($event, index)">
+                    <img v-if="options[index].photo_path" :src="options[index].photo_path" 
+                         style="width: 100px; height: 100px; object-fit: cover; margin-top: 10px;" />
+                </td>
+                <td>
+                    <button class="btn btn-danger" @click="handleRemoveOption(index)">Remove</button>
+                </td>
+            </tr>
         </tbody>
-      </table>
+    </table>
 
     <div class="form-group">
         <button class="btn btn-success w-25" @click="update" style="display: block;margin: auto">Update</button>
@@ -233,7 +246,25 @@ createApp({
             deletedGallery: [],
             images_path: [],
             options: @json($product->options),
-            images: []
+            images: [],
+            categoryOptions: {
+                'vape_kits': ['color', 'photo'],
+                'premium_liquid': ['nicotine', 'flavour', 'size', 'photo'],
+                'egyptian_liquid': ['nicotine', 'flavour', 'size', 'photo'],
+                'disposables': ['flavour', 'photo'],
+                'vape_coil_and_cartridge': ['resistance'],
+                'vape_pod': ['color', 'photo'],
+                'batteries': ['resistance']
+            }
+        }
+    },
+    computed: {
+        availableFields() {
+            const category = this.categories.find(c => c.id == "{{ $product->category_id }}") ;
+            if (!category) return [];
+            // Convert category name to snake_case to match categoryOptions keys
+            const categoryKey = category.name.toLowerCase().replace(/ /g, '_');
+            return this.categoryOptions[categoryKey] || [];
         }
     },
     methods: {

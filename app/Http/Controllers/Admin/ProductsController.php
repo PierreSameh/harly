@@ -27,7 +27,7 @@ class ProductsController extends Controller
     }
 
     public function edit($id) {
-        $product = Product::with("gallery")->latest()->find($id);
+        $product = Product::with("gallery", 'options')->latest()->find($id);
 
         if ($product)
             return view("Admin.products.edit")->with(compact("product"));
@@ -245,12 +245,10 @@ class ProductsController extends Controller
         }
         if ($request->options && $product) {
             foreach ($request->options as $option) {
-                $photo = null;
                 
                 // Check if 'photo' exists and is not null
-                if (isset($option['photo'])) {
-                    $photo = $this->saveImg($option['photo'], 'images/uploads/Options');
-                }
+                $photo = array_key_exists('photo', $option) && $option['photo'] ? 
+                $this->saveImg($option['photo'], 'images/uploads/Options') : null;
         
                 // Check if 'id' exists to update, or create a new record if not
                 $exists = isset($option['id']) ? Option::find($option['id']) : null;
@@ -262,6 +260,9 @@ class ProductsController extends Controller
                     $exists->nicotine = $option['nicotine'] ?? null;
                     $exists->price = $option['price'] ?? null;
                     $exists->photo = $photo ? '/images/uploads/Options/' . $photo : null;
+                    $exists->color = $option["color"] ?? null;
+                    $exists->resistance = $option['resistance'] ?? null;
+                    $exists->quantity = $option['quantity'] ?? null;
                     $exists->save();
                 } else {
                     // Create a new option
@@ -272,6 +273,9 @@ class ProductsController extends Controller
                         "nicotine" => $option["nicotine"] ?? null,
                         "price" => $option["price"] ?? null,
                         "photo" => $photo ? '/images/uploads/Options/' . $photo : null,
+                        "color" => $option["color"] ?? null,
+                        "resistance" => $option['resistance'] ?? null,
+                        "quantity" =>$option['quantity'] ?? null
                     ]);
                 }
             }
