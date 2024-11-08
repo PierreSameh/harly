@@ -129,15 +129,15 @@ class ProductsController extends Controller
                   ->orWhere('description', 'like', '%' . $search . '%');
             });
 
-        if ($request->has('price_from')) {
+        if ($request->has('price_from') && $request->price_from != null) {
             $query->where('price', '>=', $request->price_from);
         }
 
-        if ($request->has('price_to')) {
+        if ($request->has('price_to') && $request->price_to != null) {
             $query->where('price', '<=', $request->price_to);
         }
 
-        if ($request->has('categories')) {
+        if ($request->has('categories') && $request->categories != null) {
             $query->whereIn('category_id', $request->categories);
         }
 
