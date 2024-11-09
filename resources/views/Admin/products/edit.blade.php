@@ -247,6 +247,7 @@ createApp({
             images_path: [],
             options: @json($product->options),
             images: [],
+            currentCategory: null, // Add this to store current category object
             categoryOptions: {
                 'vape_kits': ['color', 'photo'],
                 'premium_liquid': ['nicotine', 'flavour', 'size', 'photo'],
@@ -258,20 +259,57 @@ createApp({
             }
         }
     },
+    mounted() {
+        // Initialize category after component is mounted
+        this.initializeCategory();
+    },
     computed: {
         availableFields() {
-            const category = this.categories.find(c => c.id == "{{ $product->category_id }}") ;
-            if (!category) return [];
-            // Convert category name to snake_case to match categoryOptions keys
+            // Convert category_id to number for comparison
+            const categoryIdNum = parseInt(this.category_id);
+            // console.log('Current category_id:', categoryIdNum);
+            // console.log('Available categories:', this.categories);
+            
+            const category = this.categories.find(c => parseInt(c.id) === categoryIdNum);
+            
+            if (!category) {
+                // console.log('No category found for ID:', categoryIdNum);
+                return [];
+            }
+
+            this.currentCategory = category;
+            // console.log('Current category:', category.name);
+            
             const categoryKey = category.name
-            .toLowerCase()
-                .replace(/&/g, 'and')  // Replace & with 'and'
-                .replace(/[^a-z0-9]+/g, '_')  // Replace any special chars or spaces with underscore
+                .toLowerCase()
+                .replace(/&/g, 'and')
+                .replace(/[^a-z0-9]+/g, '_')
                 .replace(/^_+|_+$/g, '');
+                
+            // console.log('Category key:', categoryKey);
+            // console.log('Available fields:', this.categoryOptions[categoryKey] || []);
+            
             return this.categoryOptions[categoryKey] || [];
         }
     },
     methods: {
+        initializeCategory() {
+            // console.log('Initializing category...');
+            // console.log('Initial category_id:', this.category_id);
+            // console.log('Categories:', this.categories);
+            
+            // Convert category_id to number for comparison
+            const categoryIdNum = parseInt(this.category_id);
+            
+            const initialCategory = this.categories.find(c => parseInt(c.id) === categoryIdNum);
+            
+            if (initialCategory) {
+                this.currentCategory = initialCategory;
+                // console.log('Initial category set:', initialCategory.name);
+            } else {
+                // console.log('Failed to find initial category for ID:', categoryIdNum);
+            }
+        },
         handleAddAdditionalData() {
             this.additional_data.push({
                 key: "",
@@ -286,60 +324,40 @@ createApp({
                 price: "",
                 photo: null,
                 photo_path: null
-            })
+            });
         },
         handleRemoveAdditionalData(index) {
             this.additional_data.splice(index, 1);
         },
-        handleAddOption() {
-            this.options.push({
-                size: "",
-                flavour: "",
-                nicotine: "",
-                price: "",
-            })
-        },
         handleRemoveOption(index) {
-            this.options.splice(index, 1)
+            this.options.splice(index, 1);
         },
         handleChangeThumbnail(event) {
-            this.thumbnail = event.target.files[0]
-            this.thumbnail_path = URL.createObjectURL(event.target.files[0])
+            this.thumbnail = event.target.files[0];
+            this.thumbnail_path = URL.createObjectURL(event.target.files[0]);
         },
         handleOptionPhotoChange(event, index) {
             const file = event.target.files[0];
             this.options[index].photo = file;
             this.options[index].photo_path = URL.createObjectURL(file);
         },
-        handleChangeThumbnail(event) {
-            this.thumbnail = event.target.files[0]
-            this.thumbnail_path = URL.createObjectURL(event.target.files[0])
-        },
         handleChangeImages(event) {
-            let files = Array.from(event.target.files)
+            let files = Array.from(event.target.files);
             files.map(file => {
-                this.images.push(file)
-                this.images_path.push(URL.createObjectURL(file))
-            })
+                this.images.push(file);
+                this.images_path.push(URL.createObjectURL(file));
+            });
         },
         handleDeleteImage(index) {
-            let arr = this.images
-            arr.splice(index, 1)
-            this.images = arr
-            let arr_paths  = this.images_path
-            arr_paths.splice(index, 1)
-            this.images_path = arr_paths
+            this.images.splice(index, 1);
+            this.images_path.splice(index, 1);
         },
         handleDeleteImageFromGallery(index) {
-            let dArr = this.deletedGallery
-            dArr.push(this.gallery[index])
-            this.deletedGallery = dArr
-            let arr = this.gallery
-            arr.splice(index, 1)
-            this.gallery = arr
+            this.deletedGallery.push(this.gallery[index]);
+            this.gallery.splice(index, 1);
         },
         async update() {
-            $('.loader').fadeIn().css('display', 'flex')
+            $('.loader').fadeIn().css('display', 'flex');
             try {
                 const response = await axios.post(`{{ route("admin.products.update") }}`, {
                     id: this.id,
@@ -356,58 +374,71 @@ createApp({
                     group: this.group,
                     code: this.code,
                     additional_data: this.additional_data
-                },
-                {
+                }, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
-                },
-                );
+                });
+                
                 if (response.data.status === true) {
-                    document.getElementById('errors').innerHTML = ''
-                    let error = document.createElement('div')
-                    error.classList = 'success'
-                    error.innerHTML = response.data.message
-                    document.getElementById('errors').append(error)
-                    $('#errors').fadeIn('slow')
+                    document.getElementById('errors').innerHTML = '';
+                    let error = document.createElement('div');
+                    error.classList = 'success';
+                    error.innerHTML = response.data.message;
+                    document.getElementById('errors').append(error);
+                    $('#errors').fadeIn('slow');
                     setTimeout(() => {
-                        $('.loader').fadeOut()
-                        $('#errors').fadeOut('slow')
-                        window.location.href = '{{ route("admin.products.show") }}'
+                        $('.loader').fadeOut();
+                        $('#errors').fadeOut('slow');
+                        window.location.href = '{{ route("admin.products.show") }}';
                     }, 1300);
                 } else {
-                    $('.loader').fadeOut()
-                    document.getElementById('errors').innerHTML = ''
+                    $('.loader').fadeOut();
+                    document.getElementById('errors').innerHTML = '';
                     $.each(response.data.errors, function (key, value) {
-                        let error = document.createElement('div')
-                        error.classList = 'error'
-                        error.innerHTML = value
-                        document.getElementById('errors').append(error)
+                        let error = document.createElement('div');
+                        error.classList = 'error';
+                        error.innerHTML = value;
+                        document.getElementById('errors').append(error);
                     });
-                    $('#errors').fadeIn('slow')
+                    $('#errors').fadeIn('slow');
                     setTimeout(() => {
-                        $('#errors').fadeOut('slow')
+                        $('#errors').fadeOut('slow');
                     }, 5000);
                 }
-
             } catch (error) {
-                document.getElementById('errors').innerHTML = ''
-                let err = document.createElement('div')
-                err.classList = 'error'
-                err.innerHTML = 'server error, please try again later'
-                // err.innerHTML = response.data.message
-                document.getElementById('errors').append(err)
-                $('#errors').fadeIn('slow')
-                $('.loader').fadeOut()
+                document.getElementById('errors').innerHTML = '';
+                let err = document.createElement('div');
+                err.classList = 'error';
+                err.innerHTML = 'server error, please try again later';
+                // err.innerHTML = error.message;
+                document.getElementById('errors').append(err);
+                $('#errors').fadeIn('slow');
+                $('.loader').fadeOut();
 
                 setTimeout(() => {
-                    $('#errors').fadeOut('slow')
+                    $('#errors').fadeOut('slow');
                 }, 3500);
 
                 console.error(error);
             }
         }
     },
-}).mount('#products_wrapper')
+    watch: {
+        category_id: {
+            immediate: true,
+            handler(newVal) {
+                const categoryIdNum = parseInt(newVal);
+                const category = this.categories.find(c => parseInt(c.id) === categoryIdNum);
+                if (category) {
+                    this.currentCategory = category;
+                    // console.log('Category changed to:', category.name);
+                } else {
+                    // console.log('No category found for ID:', categoryIdNum);
+                }
+            }
+        }
+    }
+}).mount('#products_wrapper');
 </script>
 @endSection
