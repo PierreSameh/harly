@@ -52,8 +52,8 @@ class ProductsController extends Controller
             "quantity" => ["required", "numeric"],
             "price" => ["required", "numeric"],
             "category_id" => ["required"],
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'main_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'main_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ], [
             "name.required" => "ادخل اسم المنتج",
             "main_image.required" => "ارفع الصورة الرئيسية للمنتج",
@@ -174,8 +174,8 @@ class ProductsController extends Controller
             "quantity" => ["required", "numeric"],
             "price" => ["required", "numeric"],
             "category_id" => ["required"],
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-            'main_image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'main_image' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ], [
             "name.required" => "ادخل اسم المنتج",
             "description.required" => "ادخل وصف المنتج",

@@ -27,22 +27,22 @@
                 <label for="price" class="form-label">Previous Price</label>
                 <input type="number" class="form-control" id="price"  placeholder="Previous Price" v-model="prev_price">
             </div>
-            <div class="form-group w-100">
+            {{-- <div class="form-group w-100">
                 <label for="quantity" class="form-label">Quantity</label>
                 <input type="number" class="form-control" id="quantity"  placeholder="Quantity" v-model="quantity">
-            </div>
+            </div> --}}
             <div class="form-group w-100">
                 <label for="code" class="form-label">code</label>
                 <input type="text" class="form-control" id="code" placeholder="code" v-model="code">
             </div>
-            <div class="form-group w-100">
+            {{-- <div class="form-group w-100">
                 <label for="group" class="form-label">group</label>
                 <input type="text" class="form-control" id="group" placeholder="group" v-model="group">
             </div>
             <div class="form-group w-100">
                 <label for="hashtag" class="form-label">hashtag</label>
                 <input type="text" class="form-control" id="hashtag" placeholder="hashtag" v-model="hashtag">
-            </div>
+            </div> --}}
             <div class="form-group w-100">
                 <label for="categories" class="form-label">Category</label>
                 <select name="categories" id="categories" class="form-control" v-model="category_id">
