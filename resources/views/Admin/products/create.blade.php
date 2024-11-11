@@ -148,7 +148,6 @@
                 <th scope="col" v-if="availableFields.includes('nicotine')">Nicotine</th>
                 <th scope="col" v-if="availableFields.includes('color')">Color</th>
                 <th scope="col" v-if="availableFields.includes('resistance')">Resistance</th>
-                <th scope="col">Price</th>
                 <th scope="col">Quantity</th>
                 <th scope="col" v-if="availableFields.includes('photo')">Photo</th>
                 <th></th>
@@ -170,9 +169,6 @@
                 </td>
                 <td v-if="availableFields.includes('resistance')">
                     <input type="text" class="form-control" placeholder="Resistance" v-model="options[index].resistance">
-                </td>
-                <td>
-                    <input type="number" class="form-control" placeholder="Price" v-model="options[index].price">
                 </td>
                 <td>
                     <input type="number" class="form-control" placeholder="Quantity" v-model="options[index].quantity">
@@ -225,7 +221,8 @@ createApp({
                 'disposables': ['flavour', 'photo'],
                 'vape_coil_and_cartridge': ['resistance'],
                 'vape_pod': ['color', 'photo'],
-                'batteries': ['resistance']
+                'batteries': ['resistance'],
+                'vape_tanks': ['color']
             }
         }
     },
