@@ -219,9 +219,9 @@ createApp({
                 'premium_liquid': ['nicotine', 'flavour', 'size', 'photo'],
                 'egyptian_liquid': ['nicotine', 'flavour', 'size', 'photo'],
                 'disposables': ['flavour', 'photo'],
-                'vape_coil_and_cartridge': ['resistance'],
+                'vape_coil_and_cartridge': ['resistance', 'photo'],
                 'vape_pod': ['color', 'photo'],
-                'batteries': ['resistance'],
+                'batteries': ['resistance', 'photo'],
                 'vape_tanks': ['color']
             }
         }
