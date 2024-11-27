@@ -231,7 +231,7 @@ createApp({
             id: '{{ $product->id }}',
             category_id: '{{ $product->category_id }}',
             name: '{{ $product->name }}',
-            description: '{{ $product->description }}',
+            description: `{{ $product->description }}`,
             price: '{{ $product->price }}',
             prev_price: '{{ $product->prev_price }}',
             code: '{{ $product->code }}',
@@ -244,7 +244,7 @@ createApp({
             images_path: [],
             options: @json($product->options),
             images: [],
-            currentCategory: null, // Add this to store current category object
+            currentCategory: null,
             categoryOptions: {
                 'vape_kits': ['color', 'photo'],
                 'premium_liquid': ['nicotine', 'flavour', 'size', 'photo'],
@@ -258,54 +258,36 @@ createApp({
         }
     },
     mounted() {
-        // Initialize category after component is mounted
         this.initializeCategory();
     },
     computed: {
         availableFields() {
-            // Convert category_id to number for comparison
             const categoryIdNum = parseInt(this.category_id);
-            // console.log('Current category_id:', categoryIdNum);
-            // console.log('Available categories:', this.categories);
-            
             const category = this.categories.find(c => parseInt(c.id) === categoryIdNum);
             
-            if (!category) {
-                // console.log('No category found for ID:', categoryIdNum);
-                return [];
-            }
+            if (!category) return [];
 
             this.currentCategory = category;
-            // console.log('Current category:', category.name);
             
             const categoryKey = category.name
                 .toLowerCase()
                 .replace(/&/g, 'and')
                 .replace(/[^a-z0-9]+/g, '_')
                 .replace(/^_+|_+$/g, '');
-                
-            // console.log('Category key:', categoryKey);
-            // console.log('Available fields:', this.categoryOptions[categoryKey] || []);
             
             return this.categoryOptions[categoryKey] || [];
         }
     },
     methods: {
         initializeCategory() {
-            // console.log('Initializing category...');
-            // console.log('Initial category_id:', this.category_id);
-            // console.log('Categories:', this.categories);
-            
-            // Convert category_id to number for comparison
             const categoryIdNum = parseInt(this.category_id);
-            
             const initialCategory = this.categories.find(c => parseInt(c.id) === categoryIdNum);
             
             if (initialCategory) {
                 this.currentCategory = initialCategory;
-                // console.log('Initial category set:', initialCategory.name);
+                console.log('Initial category:', initialCategory.name);
             } else {
-                // console.log('Failed to find initial category for ID:', categoryIdNum);
+                console.warn('Failed to find initial category for ID:', this.category_id);
             }
         },
         handleAddAdditionalData() {
@@ -319,7 +301,9 @@ createApp({
                 size: "",
                 flavour: "",
                 nicotine: "",
-                price: "",
+                color: "",
+                resistance: "",
+                quantity: "",
                 photo: null,
                 photo_path: null
             });
@@ -430,9 +414,9 @@ createApp({
                 const category = this.categories.find(c => parseInt(c.id) === categoryIdNum);
                 if (category) {
                     this.currentCategory = category;
-                    // console.log('Category changed to:', category.name);
+                    console.log('Category changed to:', category.name);
                 } else {
-                    // console.log('No category found for ID:', categoryIdNum);
+                    console.log('No category found for ID:', categoryIdNum);
                 }
             }
         }
