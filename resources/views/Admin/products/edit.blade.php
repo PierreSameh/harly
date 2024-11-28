@@ -352,8 +352,6 @@ createApp({
                     deleted_gallery: this.deletedGallery,
                     category_id: this.category_id,
                     options: this.options,
-                    hashtag: this.hashtag,
-                    group: this.group,
                     code: this.code,
                     additional_data: this.additional_data
                 }, {
@@ -393,7 +391,7 @@ createApp({
                 let err = document.createElement('div');
                 err.classList = 'error';
                 err.innerHTML = 'server error, please try again later';
-                // err.innerHTML = error.message;
+                //  err.innerHTML = error.message;
                 document.getElementById('errors').append(err);
                 $('#errors').fadeIn('slow');
                 $('.loader').fadeOut();
