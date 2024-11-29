@@ -195,7 +195,7 @@
                 </td>
                 <td v-if="availableFields.includes('photo')">
                     <input type="file" class="form-control" @change="handleOptionPhotoChange($event, index)">
-                    <img v-if="options[index].photo_path" :src="options[index].photo_path" 
+                    <img v-if="options[index].photo_path || options[index].photo" :src="options[index].photo_path || options[index].photo" 
                          style="width: 100px; height: 100px; object-fit: cover; margin-top: 10px;" />
                 </td>
                 <td>
