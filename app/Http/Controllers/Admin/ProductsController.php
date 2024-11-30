@@ -330,8 +330,8 @@ class ProductsController extends Controller
                 'code' => ["required"],
                 "price" => ["required", "numeric"],
                 "category_id" => ["required"],
-                'images.*' => 'image',
-                'main_image' => 'image',
+                'images.*' => 'image|max:2048',
+                'main_image' => 'image|max:2048',
             ]);
     
             if ($validator->fails()) {
@@ -339,33 +339,12 @@ class ProductsController extends Controller
             }
     
             $product = Product::with("options")->find($request->id);
-            if ($request->main_image) {
-                $main_image_name = $this->saveImg($request->main_image, 'images/uploads/Products');
-                $product->main_image = '/images/uploads/Products/' . $main_image_name;
-            }
-            if ($request->deleted_gallery) {
-                        foreach ($request->deleted_gallery as $img) {
-                            $this->deleteFile(base_path($img['path']));
-                            $imageD = Gallery::find($img['id']);
-                            $imageD->delete();
-                        }
-                    }
-            
-                    if ($request->images && $product) {
-                        foreach ($request->images as $img) {
-                            $image = $this->saveImg($img, 'images/uploads/Products');
-                            $gallery = Gallery::create([
-                                "path" => '/images/uploads/Products/' . $image,
-                                "product_id" => $product->id
-                            ]);
-                        }
-                    }
+    
             // Update product basic data
             $product->fill([
                 'name' => $request->name,
                 'description' => $request->description,
                 'price' => $request->price,
-                'prev_price' => $request->prev_price,
                 'code' => $request->code,
                 'category_id' => $request->category_id,
             ]);
