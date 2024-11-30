@@ -391,8 +391,8 @@ createApp({
                 document.getElementById('errors').innerHTML = '';
                 let err = document.createElement('div');
                 err.classList = 'error';
-                //err.innerHTML = 'server error, please try again later';
-                 err.innerHTML = error.message;
+                err.innerHTML = 'server error, please try again later';
+                 //err.innerHTML = error.message;
                 document.getElementById('errors').append(err);
                 $('#errors').fadeIn('slow');
                 $('.loader').fadeOut();
