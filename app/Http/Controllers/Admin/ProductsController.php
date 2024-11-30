@@ -353,6 +353,7 @@ class ProductsController extends Controller
             if ($request->main_image) {
                         $main_image_name = $this->saveImg($request->main_image, 'images/uploads/Products');
                         $product->main_image = '/images/uploads/Products/' . $main_image_name;
+                        $product->save();
                     }
             
                     $product->name = $request->name;
