@@ -338,17 +338,32 @@ class ProductsController extends Controller
                 return $this->handleResponse(false, "", [$validator->errors()->first()], [], []);
             }
     
-            $product = Product::with("options")->find($request->id);
+            $product = Product::with("options", 'gallery')->find($request->id);
     
-            // Update product basic data
-            $product->fill([
-                'name' => $request->name,
-                'description' => $request->description,
-                'price' => $request->price,
-                'prev_price' => $request->prev_price,
-                'code' => $request->code,
-                'category_id' => $request->category_id,
-            ]);
+            // // Update product basic data
+            // $product->fill([
+            //     'name' => $request->name,
+            //     'description' => $request->description,
+            //     'price' => $request->price,
+            //     'prev_price' => $request->prev_price,
+            //     'code' => $request->code,
+            //     'category_id' => $request->category_id,
+            // ]);
+
+            if ($request->main_image) {
+                        $main_image_name = $this->saveImg($request->main_image, 'images/uploads/Products');
+                        $product->main_image = '/images/uploads/Products/' . $main_image_name;
+                    }
+            
+                    $product->name = $request->name;
+                    $product->description = $request->description;
+                    $product->quantity = 0;
+                    $product->price = $request->price;
+                    $product->prev_price = $request->prev_price;
+                    $product->code = $request->code;
+                    $product->category_id = $request->category_id;
+                    $product->save();
+
     
             // Delete existing options
             foreach ($product->options as $option) {
@@ -356,36 +371,44 @@ class ProductsController extends Controller
             }
     
             // Handle options
-            if ($request->options) {
-                foreach ($request->options as $optionData) {
-                    $photo = null;
-    
-                    if (isset($optionData['photo'])) {
-                        if ($optionData['photo'] instanceof \Illuminate\Http\UploadedFile) {
-                            // If it's a new uploaded file
-                            $photoName = $this->saveImg($optionData['photo'], 'images/uploads/Options');
-                            $photo = '/images/uploads/Options/' . $photoName;
-                        } elseif (Storage::exists($optionData['photo'])) {
-                            // If it's an existing file path
-                            $photo = $optionData['photo'];
+            if ($request->options && $product) {
+                        foreach ($request->options as $option) {
+                            
+                            // Check if 'photo' exists and is not null
+                            $photo = array_key_exists('photo', $option) && $option['photo'] ? 
+                            $this->saveImg($option['photo'], 'images/uploads/Options') : null;
+                    
+                            // Check if 'id' exists to update, or create a new record if not
+                            $exists = isset($option['id']) ? Option::find($option['id']) : null;
+                    
+                            if ($exists) {
+                                // Update existing option
+                                $exists->size = $option['size'] ?? null;
+                                $exists->flavour = $option['flavour'] ?? null;
+                                $exists->nicotine = $option['nicotine'] ?? null;
+                                $exists->price = $option['price'] ?? null;
+                                $exists->photo = $photo ? '/images/uploads/Options/' . $photo : null;
+                                $exists->color = $option["color"] ?? null;
+                                $exists->resistance = $option['resistance'] ?? null;
+                                $exists->quantity = $option['quantity'] ?? null;
+                                $exists->save();
+                            } else {
+                                // Create a new option
+                                Option::create([
+                                    "product_id" => $product->id,
+                                    "size" => $option["size"] ?? null,
+                                    "flavour" => $option["flavour"] ?? null,
+                                    "nicotine" => $option["nicotine"] ?? null,
+                                    "price" => $option["price"] ?? null,
+                                    "photo" => $photo ? '/images/uploads/Options/' . $photo : null,
+                                    "color" => $option["color"] ?? null,
+                                    "resistance" => $option['resistance'] ?? null,
+                                    "quantity" =>$option['quantity'] ?? null
+                                ]);
+                            }
                         }
                     }
     
-                    Option::create([
-                        "product_id" => $product->id,
-                        "size" => $optionData["size"] ?? null,
-                        "flavour" => $optionData["flavour"] ?? null,
-                        "nicotine" => $optionData["nicotine"] ?? null,
-                        "price" => $optionData["price"] ?? null,
-                        "photo" => $photo,
-                        "color" => $optionData["color"] ?? null,
-                        "resistance" => $optionData["resistance"] ?? null,
-                        "quantity" => $optionData['quantity'] ?? null,
-                    ]);
-                }
-            }
-    
-            $product->save();
     
             return $this->handleResponse(true, "تم تحديث المنتج بنجاح", [], [], []);
         } catch (\Exception $e) {
