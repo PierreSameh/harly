@@ -322,6 +322,7 @@ class ProductsController extends Controller
 
     public function update(Request $request)
     {
+        DB::beginTransaction();
         try {
             $validator = Validator::make($request->all(), [
                 "id" => ["required"],
@@ -338,90 +339,96 @@ class ProductsController extends Controller
                 return $this->handleResponse(false, "", [$validator->errors()->first()], [], []);
             }
     
-            $product = Product::with("options", 'gallery')->find($request->id);
+            $product = Product::with("options", 'gallery')->findOrFail($request->id);
     
-
-            if ($request->hasFile('main_image')) {  // Ensure this condition is correct
+            // Handle main image update
+            if ($request->hasFile('main_image')) {
+                // Optional: Delete old main image file
+                $this->deleteFile(base_path($product->main_image));
+    
                 $main_image_name = $this->saveImg($request->main_image, 'images/uploads/Products');
                 $product->main_image = '/images/uploads/Products/' . $main_image_name;
             }
-            
-            
-                    $product->name = $request->name;
-                    $product->description = $request->description;
-                    $product->quantity = 0;
-                    $product->price = $request->price;
-                    $product->prev_price = $request->prev_price;
-                    $product->code = $request->code;
-                    $product->category_id = $request->category_id;
-                    $product->save();
+    
+            // Update product details
+            $product->fill([
+                'name' => $request->name,
+                'description' => $request->description,
+                'quantity' => 0,
+                'price' => $request->price,
+                'prev_price' => $request->prev_price,
+                'code' => $request->code,
+                'category_id' => $request->category_id,
+            ])->save();
+    
             // Handle gallery updates
             if ($request->deleted_gallery) {
-                        foreach ($request->deleted_gallery as $img) {
-                            $this->deleteFile(base_path($img['path']));
-                            $imageD = Gallery::find($img['id']);
-                            $imageD->delete();
-                        }
-                    }
-            
-                    if ($request->images && $product) {
-                        foreach ($request->images as $img) {
-                            $image = $this->saveImg($img, 'images/uploads/Products');
-                            $gallery = Gallery::create([
-                                "path" => '/images/uploads/Products/' . $image,
-                                "product_id" => $product->id
-                            ]);
-                        }
-                    }
-
+                foreach ($request->deleted_gallery as $img) {
+                    $this->deleteFile(base_path($img['path']));
+                    Gallery::where('id', $img['id'])->delete();
+                }
+            }
     
-            // Delete existing options
-            foreach ($product->options as $option) {
-                $option->delete();
+            if ($request->has('images')) {
+                foreach ($request->images as $img) {
+                    if ($img instanceof \Illuminate\Http\UploadedFile) {
+                        $image = $this->saveImg($img, 'images/uploads/Products');
+                        Gallery::create([
+                            "path" => '/images/uploads/Products/' . $image,
+                            "product_id" => $product->id
+                        ]);
+                    }
+                }
             }
     
             // Handle options
-            if ($request->options && $product) {
-                        foreach ($request->options as $option) {
-                            
-                            // Check if 'photo' exists and is not null
-                            $photo = array_key_exists('photo', $option) && $option['photo'] ? 
-                            $this->saveImg($option['photo'], 'images/uploads/Options') : null;
-                    
-                            // Check if 'id' exists to update, or create a new record if not
-                            $exists = isset($option['id']) ? Option::find($option['id']) : null;
-                    
-                            if ($exists) {
-                                // Update existing option
-                                $exists->size = $option['size'] ?? null;
-                                $exists->flavour = $option['flavour'] ?? null;
-                                $exists->nicotine = $option['nicotine'] ?? null;
-                                $exists->price = $option['price'] ?? null;
-                                $exists->photo = $photo ? '/images/uploads/Options/' . $photo : null;
-                                $exists->color = $option["color"] ?? null;
-                                $exists->resistance = $option['resistance'] ?? null;
-                                $exists->quantity = $option['quantity'] ?? null;
-                                $exists->save();
-                            } else {
-                                // Create a new option
-                                Option::create([
-                                    "product_id" => $product->id,
-                                    "size" => $option["size"] ?? null,
-                                    "flavour" => $option["flavour"] ?? null,
-                                    "nicotine" => $option["nicotine"] ?? null,
-                                    "price" => $option["price"] ?? null,
-                                    "photo" => $photo ? '/images/uploads/Options/' . $photo : null,
-                                    "color" => $option["color"] ?? null,
-                                    "resistance" => $option['resistance'] ?? null,
-                                    "quantity" =>$option['quantity'] ?? null
-                                ]);
-                            }
-                        }
+            if ($request->options) {
+                $existingOptionIds = $product->options->pluck('id')->toArray();
+                $updatedOptionIds = [];
+    
+                foreach ($request->options as $optionData) {
+                    $option = isset($optionData['id']) 
+                        ? Option::find($optionData['id']) 
+                        : new Option();
+    
+                    // Handle option photo
+                    $photo = $option->photo; // Keep existing photo path if no new photo is uploaded
+                    if (isset($optionData['photo']) && $optionData['photo'] instanceof \Illuminate\Http\UploadedFile) {
+                        $photoName = $this->saveImg($optionData['photo'], 'images/uploads/Options');
+                        $photo = '/images/uploads/Options/' . $photoName;
                     }
     
+                    $optionAttributes = [
+                        "product_id" => $product->id,
+                        "size" => $optionData["size"] ?? null,
+                        "flavour" => $optionData["flavour"] ?? null,
+                        "nicotine" => $optionData["nicotine"] ?? null,
+                        "price" => $optionData["price"] ?? null,
+                        "photo" => $photo,
+                        "color" => $optionData["color"] ?? null,
+                        "resistance" => $optionData['resistance'] ?? null,
+                        "quantity" => $optionData['quantity'] ?? null,
+                    ];
     
+                    if ($option->exists) {
+                        $option->fill($optionAttributes)->save();
+                        $updatedOptionIds[] = $option->id;
+                    } else {
+                        $newOption = Option::create($optionAttributes);
+                        $updatedOptionIds[] = $newOption->id;
+                    }
+                }
+    
+                // Remove options not in the update request
+                Option::where('product_id', $product->id)
+                    ->whereNotIn('id', $updatedOptionIds)
+                    ->delete();
+            }
+    
+            DB::commit();
             return $this->handleResponse(true, "تم تحديث المنتج بنجاح", [], [], []);
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->handleResponse(false, '', [$e->getMessage()], [], []);
         }
     }

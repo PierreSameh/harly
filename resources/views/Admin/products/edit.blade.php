@@ -349,6 +349,7 @@ createApp({
                     prev_price: this.prev_price,
                     quantity: this.quantity,
                     images: this.images,
+                    main_image: this.thumbnail,
                     deleted_gallery: this.deletedGallery,
                     category_id: this.category_id,
                     options: this.options,
@@ -390,8 +391,8 @@ createApp({
                 document.getElementById('errors').innerHTML = '';
                 let err = document.createElement('div');
                 err.classList = 'error';
-                err.innerHTML = 'server error, please try again later';
-                //  err.innerHTML = error.message;
+                //err.innerHTML = 'server error, please try again later';
+                 err.innerHTML = error.message;
                 document.getElementById('errors').append(err);
                 $('#errors').fadeIn('slow');
                 $('.loader').fadeOut();
