@@ -345,6 +345,7 @@ class ProductsController extends Controller
                 'name' => $request->name,
                 'description' => $request->description,
                 'price' => $request->price,
+                'prev_price' => $request->prev_price,
                 'code' => $request->code,
                 'category_id' => $request->category_id,
             ]);
