@@ -340,21 +340,12 @@ class ProductsController extends Controller
     
             $product = Product::with("options", 'gallery')->find($request->id);
     
-            // // Update product basic data
-            // $product->fill([
-            //     'name' => $request->name,
-            //     'description' => $request->description,
-            //     'price' => $request->price,
-            //     'prev_price' => $request->prev_price,
-            //     'code' => $request->code,
-            //     'category_id' => $request->category_id,
-            // ]);
 
-            if ($request->main_image) {
-                        $main_image_name = $this->saveImg($request->main_image, 'images/uploads/Products');
-                        $product->main_image = '/images/uploads/Products/' . $main_image_name;
-                        $product->save();
-                    }
+            if ($request->hasFile('main_image')) {  // Ensure this condition is correct
+                $main_image_name = $this->saveImg($request->main_image, 'images/uploads/Products');
+                $product->main_image = '/images/uploads/Products/' . $main_image_name;
+            }
+            
             
                     $product->name = $request->name;
                     $product->description = $request->description;
@@ -364,6 +355,24 @@ class ProductsController extends Controller
                     $product->code = $request->code;
                     $product->category_id = $request->category_id;
                     $product->save();
+            // Handle gallery updates
+            if ($request->deleted_gallery) {
+                        foreach ($request->deleted_gallery as $img) {
+                            $this->deleteFile(base_path($img['path']));
+                            $imageD = Gallery::find($img['id']);
+                            $imageD->delete();
+                        }
+                    }
+            
+                    if ($request->images && $product) {
+                        foreach ($request->images as $img) {
+                            $image = $this->saveImg($img, 'images/uploads/Products');
+                            $gallery = Gallery::create([
+                                "path" => '/images/uploads/Products/' . $image,
+                                "product_id" => $product->id
+                            ]);
+                        }
+                    }
 
     
             // Delete existing options
