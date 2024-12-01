@@ -467,7 +467,9 @@ class ProductsController extends Controller
         }
 
         $product = Product::with("gallery")->find($request->id);
-
+        if (!$product) {
+            return redirect()->route('admin.products.show')->with('error', 'Product not found.');
+        }
         if ($product->gallery) {
             foreach ($product->gallery as $img) {
                 $this->deleteFile(base_path($img['path']));
@@ -480,13 +482,8 @@ class ProductsController extends Controller
         $product->delete();
 
         if ($product)
-            return $this->handleResponse(
-                true,
-                "تم حذف المنتج بنجاح",
-                [],
-                [],
-                []
-            );
+    return redirect()->route('admin.products.show')->with('success', 'Product deleted successfully.');
+
 
     }
     public function toggleProductDiscounted($id) {
