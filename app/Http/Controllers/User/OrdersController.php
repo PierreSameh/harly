@@ -80,7 +80,6 @@ class OrdersController extends Controller
                 } else {
                     $item->dose_product_missing = true;
                     $item->product = "This product is missing may be deleted!";
-                    return response()->json(404);
                 }
             }
 
@@ -113,7 +112,7 @@ class OrdersController extends Controller
                         "order_id" => $order->id,
                         "product_id" => $item["product_id"],
                         "option_id" => $item["option_id"],
-                        "price_in_order" => $option ? $option->price : $product->price,
+                        "price_in_order" => $option->price,
                         "ordered_quantity" => $item["quantity"],
                     ]);
                     if($option){
