@@ -66,9 +66,7 @@ class OrdersController extends Controller
             $sub_total = $request->ship_rate;
             // Calculate cart sub total
             foreach ($cart as $item) {
-                // $item_product = $item->product()->with(["gallery" => function ($q) {
-                //     $q->take(1);
-                $item_product = Product::where('id', $item->product_id)->with(["gallery" => function ($q) {
+                $item_product = $item->product()->with(["gallery" => function ($q) {
                     $q->take(1);
                 },])->first();
                 $item_option = $item->option;
@@ -105,15 +103,18 @@ class OrdersController extends Controller
 
             foreach ($cart as $item) {
                 if (!$item->dose_product_missing) {
+                    $product = Product::find($item["product_id"]);
+                    $option = Option::find($item['option_id']);
+                    if(!$product || !$option){
+                        return response()->json(["message" => "product or option is not available at the moment"], 404);
+                    }
                     Ordered_Product::create([
                         "order_id" => $order->id,
                         "product_id" => $item["product_id"],
                         "option_id" => $item["option_id"],
-                        "price_in_order" => $item->option ? $item->option->price : $item->product->price,
+                        "price_in_order" => $option ? $option->price : $product->price,
                         "ordered_quantity" => $item["quantity"],
                     ]);
-                    $product = Product::find($item["product_id"]);
-                    $option = Option::find($item['option_id']);
                     if($option){
                         $option->quantity -= (int) $item["quantity"];
                         $option->save();
