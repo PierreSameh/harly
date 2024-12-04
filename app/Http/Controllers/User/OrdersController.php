@@ -112,7 +112,7 @@ class OrdersController extends Controller
                         "order_id" => $order->id,
                         "product_id" => $item["product_id"],
                         "option_id" => $item["option_id"],
-                        "price_in_order" => $option->price,
+                        "price_in_order" => $product->price,
                         "ordered_quantity" => $item["quantity"],
                     ]);
                     if($option){
