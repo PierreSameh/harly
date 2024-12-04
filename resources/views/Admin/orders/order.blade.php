@@ -104,15 +104,15 @@
                 </tr>
             </thead>
             <tbody>
-                    @foreach ($order->products as $product)
-                    @if($product->product)
+                    @foreach ($order->option as $option)
+                    @if($option->option)
                     <tr>
-                        <td>{{ $order->option->id }}</td>
-                        <td>{{ $order->option->size }}</td>
-                        <td>{{ $order->option->flavour }}</td>
-                        <td>{{ $order->option->nicotine }}</td>
-                        <td>{{ $order->option->color }}</td>
-                        <td>{{ $order->option->resistance }}</td>
+                        <td>{{ $option->id }}</td>
+                        <td>{{ $option->size }}</td>
+                        <td>{{ $option->flavour }}</td>
+                        <td>{{ $option->nicotine }}</td>
+                        <td>{{ $option->color }}</td>
+                        <td>{{ $option->resistance }}</td>
                     </tr>
                     @else
                     <tr class="text-center text-danger">
