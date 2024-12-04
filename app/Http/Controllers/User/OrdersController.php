@@ -65,23 +65,42 @@ class OrdersController extends Controller
 
             $sub_total = $request->ship_rate;
             // Calculate cart sub total
+            // foreach ($cart as $item) {
+            //     $item_product = $item->product()->with(["gallery" => function ($q) {
+            //         $q->take(1);
+            //     },])->first();
+            //     $item_option = $item->option;
+            //     if ($item_product) {
+            //         if($item_option){
+            //             $item->total = ((int) $item_option->price * (int) $item->quantity);
+            //         } else {
+            //             $item->total = ((int) $item_product->price * (int) $item->quantity);
+            //         }
+            //     $sub_total += $item->total;
+            //     } else {
+            //         $item->dose_product_missing = true;
+            //         $item->product = "This product is missing may be deleted!";
+            //     }
+            // }
+
             foreach ($cart as $item) {
-                $item_product = $item->product()->with(["gallery" => function ($q) {
-                    $q->take(1);
-                },])->first();
+                $item_product = $item->product()->with('gallery')->first();
                 $item_option = $item->option;
+            
                 if ($item_product) {
-                    if($item_option){
-                        $item->total = ((int) $item_option->price * (int) $item->quantity);
+                    $item->dose_product_missing = false;  // Product exists
+                    if ($item_option) {
+                        $item->total = $item_option->price * $item->quantity;
                     } else {
-                        $item->total = ((int) $item_product->price * (int) $item->quantity);
+                        $item->total = $item_product->price * $item->quantity;
                     }
-                $sub_total += $item->total;
+                    $sub_total += $item->total;
                 } else {
-                    $item->dose_product_missing = true;
+                    $item->dose_product_missing = true;  // Mark as missing
                     $item->product = "This product is missing may be deleted!";
                 }
             }
+            
 
             // Create order
             $order = Order::create([
