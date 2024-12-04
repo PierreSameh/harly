@@ -80,6 +80,7 @@ class OrdersController extends Controller
                 } else {
                     $item->dose_product_missing = true;
                     $item->product = "This product is missing may be deleted!";
+                    return response()->json(404);
                 }
             }
 
