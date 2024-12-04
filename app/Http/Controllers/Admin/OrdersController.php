@@ -38,11 +38,13 @@ class OrdersController extends Controller
     }
 
     public function order($id) {
-        $order = Order::with(["products" => function ($q) {
-            $q->with(["product" => function ($q) {
-                $q->with("category");
-            }]);
-        }, "user", "option"])->find($id);
+//        $order = Order::with(["products" => function ($q) {
+        //     $q->with(["product" => function ($q) {
+        //         $q->with("category");
+        //     }]);
+        // }, "user", "option"])->find($id);
+        $order = Order::with(['products.product.category', 'products.option', 'user'])->findOrFail($id);
+
         if ($order)
             return view("Admin.orders.order")->with(compact("order"));
 

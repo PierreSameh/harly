@@ -41,4 +41,10 @@ class Order extends Model
         return $this->hasMany('App\Models\Ordered_Product', 'order_id');
     }
 
+    public function options()
+    {
+        return $this->hasManyThrough(Option::class, Ordered_Product::class, 'order_id', 'id', 'id', 'option_id');
+    }
+
+
 }

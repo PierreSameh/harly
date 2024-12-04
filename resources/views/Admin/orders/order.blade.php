@@ -91,38 +91,39 @@
         </table>
     </div>
     <h2>Order Option:</h2>
-    <div class="table-responsive p-2">
-        <table class="table table-bordered" width="100%" cellspacing="0" style="white-space: nowrap;">
-            <thead>
+<div class="table-responsive p-2">
+    <table class="table table-bordered" width="100%" cellspacing="0" style="white-space: nowrap;">
+        <thead>
+            <tr>
+                <th>Option Id</th>
+                <th>Size</th>
+                <th>Flavour</th>
+                <th>Nicotine</th>
+                <th>Color</th>
+                <th>Resistance</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($order->products as $orderedProduct)
+                @if($orderedProduct->option)
                 <tr>
-                    <th>Option Id</th>
-                    <th>Size</th>
-                    <th>Flavour</th>
-                    <th>Nicotine</th>
-                    <th>Color</th>
-                    <th>Resistance</th>
+                    <td>{{ $orderedProduct->option->id }}</td>
+                    <td>{{ $orderedProduct->option->size ?? 'N/A' }}</td>
+                    <td>{{ $orderedProduct->option->flavour ?? 'N/A' }}</td>
+                    <td>{{ $orderedProduct->option->nicotine ?? 'N/A' }}</td>
+                    <td>{{ $orderedProduct->option->color ?? 'N/A' }}</td>
+                    <td>{{ $orderedProduct->option->resistance ?? 'N/A' }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                    @foreach ($order->option as $option)
-                    @if($option->option)
-                    <tr>
-                        <td>{{ $option->id }}</td>
-                        <td>{{ $option->size }}</td>
-                        <td>{{ $option->flavour }}</td>
-                        <td>{{ $option->nicotine }}</td>
-                        <td>{{ $option->color }}</td>
-                        <td>{{ $option->resistance }}</td>
-                    </tr>
-                    @else
-                    <tr class="text-center text-danger">
-                        <td colspan="5">Missing Product may be deleted</td>
-                    </tr>
-                    @endif
-                    @endforeach
-            </tbody>
-        </table>
-    </div>
+                @else
+                <tr class="text-center text-danger">
+                    <td colspan="6">Missing Option Details</td>
+                </tr>
+                @endif
+            @endforeach
+        </tbody>
+    </table>
+</div>
+
 
     <div class="btns d-flex gap-3 justify-content-center">
 
