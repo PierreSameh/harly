@@ -42,7 +42,7 @@ class OrdersController extends Controller
             $q->with(["product" => function ($q) {
                 $q->with("category");
             }]);
-        }, "user"])->find($id);
+        }, "user", "option"])->find($id);
         if ($order)
             return view("Admin.orders.order")->with(compact("order"));
 

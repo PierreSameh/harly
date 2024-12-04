@@ -90,6 +90,39 @@
             </tbody>
         </table>
     </div>
+    <h2>Order Option:</h2>
+    <div class="table-responsive p-2">
+        <table class="table table-bordered" width="100%" cellspacing="0" style="white-space: nowrap;">
+            <thead>
+                <tr>
+                    <th>Option Id</th>
+                    <th>Size</th>
+                    <th>Flavour</th>
+                    <th>Nicotine</th>
+                    <th>Color</th>
+                    <th>Resistance</th>
+                </tr>
+            </thead>
+            <tbody>
+                    @foreach ($order->products as $product)
+                    @if($product->product)
+                    <tr>
+                        <td>{{ $order->option->id }}</td>
+                        <td>{{ $order->option->size }}</td>
+                        <td>{{ $order->option->flavour }}</td>
+                        <td>{{ $order->option->nicotine }}</td>
+                        <td>{{ $order->option->color }}</td>
+                        <td>{{ $order->option->resistance }}</td>
+                    </tr>
+                    @else
+                    <tr class="text-center text-danger">
+                        <td colspan="5">Missing Product may be deleted</td>
+                    </tr>
+                    @endif
+                    @endforeach
+            </tbody>
+        </table>
+    </div>
 
     <div class="btns d-flex gap-3 justify-content-center">
 
